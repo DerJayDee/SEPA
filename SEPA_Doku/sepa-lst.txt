@@ -1,0 +1,11 @@
+Lastschrifteinzug REF130504 vom 04.05.2013
+
+  NR  NAME                            BIC            IBAN                    BETRAG DER ZAHLUNGSPFLICHTIGEN :
+*******************************************************************************************************************
+    1 Becker, Anno                    COLSDE33     / DE97370501981034773620  EUR        60,00  Mitgliedsbeitrag 201
+    2 Ludwig, Michaela                PBNKDEFF370  / DE06370100500368464502  EUR        60,00  Mitgliedsbeitrag 201
+    3 Franz, Dr., Dietmar             COLSDE33     / DE93370501981015052622  EUR        60,00  Mitgliedsbeitrag 201
+    4 Friedrich, Thorsten             COLSDE33     / DE97370501981001653649  EUR        60,00  Mitgliedsbeitrag 201
+    5 Glombitza, Michael              COLSDE33     / DE77370501981043143625  EUR        60,00  Mitgliedsbeitrag 201
+*******************************************************************************************************************
+SUMME:                                                                       EUR       300,00

@@ -1,0 +1,31 @@
+ SEPA BEGLEITZETTEL
+
+ Auftrag               : SEPA Sammellastschrift       CDM
+ Dateiname             : sepa.xml
+
+==========================================================================
+ BASIS - L A S T S C H R I F T E N
+ Datei-ID   : MES001-20130504110445
+ Datum/Zeit : 04.05.2013 11:04:45
+--------------------------------------------------------------------------
+ Sammlerreferenz           : Pmt-ID-01
+ Bank-Code                 : COLSDE33
+ Kontonummer               : DE52370501981003502018
+ Auftraggeberdaten         : DLRG Rodenkirchen e.V.
+ Anzahl der Zahlungssaetze : 5
+ Summe der Betraege (EUR)  : 300,00
+ Ausfuehrungstermin        : 2013-05-13
+==========================================================================
+
+
+ Koeln, den 04.05.2013 
+
+
+
+
+ DLRG Rodenkirchen e.V.
+ DLRG Rodenkirchen e.V.
+ Am Sandpfad 10
+ D-50999 Koeln
+
+ Tel.: 0171 6131919
