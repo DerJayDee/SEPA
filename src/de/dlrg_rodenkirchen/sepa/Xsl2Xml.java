@@ -7,9 +7,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -30,7 +32,7 @@ public class Xsl2Xml extends JFrame {
 
 	private static final long serialVersionUID = 737038282745995221L;
 
-	private static final String propsName = "ressources/config.cfg";
+	private static final String propsName = "config.cfg";
 	private static final String p_credName = "credName";
 	private static final String p_credID = "credId";
 	private static final String p_credIBAN = "credIBAN";
@@ -187,8 +189,16 @@ public class Xsl2Xml extends JFrame {
 		if (props == null) {
 			props = new Properties();
 		}
+		InputStream in;
 		try {
-			props.load(new FileInputStream(propsName));
+			File propsFile = new File(propsName);
+			if (propsFile.exists()) {
+				in = new FileInputStream(propsFile);
+			} else {
+				in = Xsl2Xml.class.getClassLoader().getResourceAsStream(
+						propsName);
+			}
+			props.load(in);
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}

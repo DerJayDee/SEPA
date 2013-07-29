@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -33,6 +34,8 @@ public class XMLCreator {
 	private static final String p_credIBAN = "credIBAN";
 	private static final String p_credBIC = "credBIC";
 	private static final String p_execDate = "execDate";
+	
+	private int counter;
 
 	private Properties props;
 
@@ -76,6 +79,8 @@ public class XMLCreator {
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
 		Document doc = docBuilder.newDocument();
+		
+		counter = 0;
 
 		// Document
 		Element document = createDocumentElem(doc);
@@ -286,10 +291,68 @@ public class XMLCreator {
 	}
 
 	private Element createDbtr(Mitglied m, Document doc) {
+		Element drctDbtTxInf = doc.createElement("DrctDbtTxInf");
+		
+		// PmtId
+		Element pmtId = doc.createElement("PmtId");
+		Element endToEndId = doc.createElement("EndToEndId");
+		endToEndId.appendChild(doc.createTextNode("EToE" + m.mitgliedsNr));
+		pmtId.appendChild(endToEndId);
+		drctDbtTxInf.appendChild(pmtId);
+		
+		// InstdAmt
+		Element instdAmt = doc.createElement("InstdAmt");
+		instdAmt.setAttribute("Ccy", "EUR");
+		instdAmt.appendChild(doc.createTextNode(String.format(Locale.ENGLISH, "%1$,.2f", Double.parseDouble(m.betrag))));
+		drctDbtTxInf.appendChild(instdAmt);
+		
+		// DrctDbtTx
+		Element drctDbtTx = doc.createElement("DrctDbtTx");
+		Element mndtRltdInf = doc.createElement("MndtRltdInf");
+		Element mndtId = doc.createElement("MndtId");
+		mndtId.appendChild(doc.createTextNode(m.mitgliedsNr + counter++));
+		mndtRltdInf.appendChild(mndtId);
+		Element dtOfSgntr = doc.createElement("DtOfSgntr");
+		dtOfSgntr.appendChild(doc.createTextNode("2001-01-01"));
+		mndtRltdInf.appendChild(dtOfSgntr);
+		Element amdmntInd = doc.createElement("AmdmntInd");
+		amdmntInd.appendChild(doc.createTextNode("false"));
+		mndtRltdInf.appendChild(amdmntInd);
+		drctDbtTx.appendChild(mndtRltdInf);
+		drctDbtTxInf.appendChild(drctDbtTx);
+		
+		// DbtrAgt
+		Element dbtrAgt = doc.createElement("DbtrAgt");
+		Element finInstnId = doc.createElement("FinInstnId");
+		Element bic = doc.createElement("BIC");
+		bic.appendChild(doc.createTextNode(m.bic));
+		finInstnId.appendChild(bic);
+		dbtrAgt.appendChild(finInstnId);
+		drctDbtTxInf.appendChild(dbtrAgt);
+		
+		// Dbtr
 		Element dbtr = doc.createElement("Dbtr");
+		Element nm = doc.createElement("Nm");
+		nm.appendChild(doc.createTextNode(m.kontoinhaber));
+		dbtr.appendChild(nm);
+		drctDbtTxInf.appendChild(dbtr);
+		
+		// DbtrAcct
+		Element dbtrAcct = doc.createElement("DbtrAcct");
+		Element id = doc.createElement("Id");
+		Element iban = doc.createElement("IBAN");
+		iban.appendChild(doc.createTextNode(m.iban));
+		id.appendChild(iban);
+		dbtrAcct.appendChild(id);
+		drctDbtTxInf.appendChild(dbtrAcct);
+		
+		// RmtInf
+		Element rmtInf = doc.createElement("RmtInf");
+		Element ustrd = doc.createElement("Ustrd");
+		ustrd.appendChild(doc.createTextNode("Jahresbeitrag DLRG für " + m.vorname + " " + m.name));
+		rmtInf.appendChild(ustrd);
+		drctDbtTxInf.appendChild(rmtInf);
 
-		// FIXME fertig machen!
-
-		return dbtr;
+		return drctDbtTxInf;
 	}
 }
