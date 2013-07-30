@@ -30,7 +30,7 @@ public class Xsl2Xml extends JFrame {
 
 	private static final long serialVersionUID = 737038282745995221L;
 
-	private static final String propsName = "config.cfg";
+	private static final String propsName = "SEPA_config.cfg";
 	private static final String p_credName = "credName";
 	private static final String p_credID = "credId";
 	private static final String p_credIBAN = "credIBAN";
@@ -203,8 +203,6 @@ public class Xsl2Xml extends JFrame {
 			}
 			if (in != null) {
 				props.load(in);
-			} else {
-				System.out.println("in ist leer");
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
