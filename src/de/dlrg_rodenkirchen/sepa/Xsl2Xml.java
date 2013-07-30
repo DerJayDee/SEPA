@@ -23,10 +23,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-
-import jxl.read.biff.BiffException;
 
 public class Xsl2Xml extends JFrame {
 
@@ -89,7 +85,7 @@ public class Xsl2Xml extends JFrame {
 								"Keine Einträge gefunden", "Fehler",
 								JOptionPane.ERROR_MESSAGE);
 					}
-				} catch (BiffException | IOException e1) {
+				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
@@ -121,8 +117,7 @@ public class Xsl2Xml extends JFrame {
 								"XML-Datei erfolgreich geschrieben",
 								"XML geschrieben",
 								JOptionPane.INFORMATION_MESSAGE);
-					} catch (ParserConfigurationException
-							| TransformerException e1) {
+					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
 				}
@@ -198,7 +193,11 @@ public class Xsl2Xml extends JFrame {
 				in = Xsl2Xml.class.getClassLoader().getResourceAsStream(
 						propsName);
 			}
-			props.load(in);
+			if (in != null) {
+				props.load(in);
+			} else {
+				System.out.println("in ist leer");
+			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
