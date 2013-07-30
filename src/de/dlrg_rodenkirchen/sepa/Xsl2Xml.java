@@ -10,7 +10,6 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -91,9 +90,6 @@ public class Xsl2Xml extends JFrame {
 					e1.printStackTrace();
 				}
 			}
-			if (rVal == JFileChooser.CANCEL_OPTION) {
-				// TODO Vielleicht mal was mit machen
-			}
 		}
 	}
 
@@ -128,9 +124,6 @@ public class Xsl2Xml extends JFrame {
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
-				}
-				if (rVal == JFileChooser.CANCEL_OPTION) {
-					// TODO Vielleicht mal was mit machen
 				}
 			}
 
@@ -204,8 +197,8 @@ public class Xsl2Xml extends JFrame {
 			if (in != null) {
 				props.load(in);
 			}
-		} catch (IOException ex) {
-			ex.printStackTrace();
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
 	}
 
@@ -213,16 +206,17 @@ public class Xsl2Xml extends JFrame {
 		if (props == null) {
 			props = new Properties();
 		}
+
+		// remove whitespaces
+		tf_credID.setText(tf_credID.getText().replaceAll("\\s", ""));
+		tf_credIBAN.setText(tf_credIBAN.getText().replaceAll("\\s", ""));
+		tf_credBIC.setText(tf_credBIC.getText().replaceAll("\\s", ""));
+		tf_execDate.setText(tf_execDate.getText().replaceAll("\\s", ""));
+		
 		try {
-			// remove whitespaces
-			tf_credID.setText(tf_credID.getText().replaceAll("\\s",""));
-			tf_credIBAN.setText(tf_credIBAN.getText().replaceAll("\\s",""));
-			tf_credBIC.setText(tf_credBIC.getText().replaceAll("\\s",""));
-			tf_execDate.setText(tf_execDate.getText().replaceAll("\\s",""));
-			
 			// trim execDate
 			tf_execDate.setText(tf_execDate.getText().substring(0, 10));
-			
+
 			// set all props
 			props.put(p_credName, tf_credName.getText());
 			props.put(p_credID, tf_credID.getText());
@@ -232,8 +226,8 @@ public class Xsl2Xml extends JFrame {
 			// save properties to project root folder
 			props.store(new FileOutputStream(propsName), null);
 
-		} catch (IOException ex) {
-			ex.printStackTrace();
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
 	}
 
@@ -326,7 +320,7 @@ public class Xsl2Xml extends JFrame {
 		try {
 			Date execDate = sdfToDate.parse(datum);
 			Date now = new Date();
-			if(now.after(execDate)){
+			if (now.after(execDate)) {
 				return true;
 			}
 		} catch (Exception e1) {
