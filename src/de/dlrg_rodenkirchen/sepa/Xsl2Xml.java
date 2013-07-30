@@ -12,6 +12,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -107,6 +109,12 @@ public class Xsl2Xml extends JFrame {
 				JOptionPane.showMessageDialog(c,
 						"Sie müssen alle Werte eingeben", "Fehlende Werte",
 						JOptionPane.ERROR_MESSAGE);
+			} else if (wrongDate()) {
+				JOptionPane
+						.showMessageDialog(
+								c,
+								"Das Datum muss im Format 'yyyy-mm-dd' eingegeben werden und in der Zukunft liegen.",
+								"Ungültiges Datum", JOptionPane.ERROR_MESSAGE);
 			} else {
 				int rVal = c.showSaveDialog(Xsl2Xml.this);
 				if (rVal == JFileChooser.APPROVE_OPTION) {
@@ -303,5 +311,20 @@ public class Xsl2Xml extends JFrame {
 		gbc.weightx = 0.5;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		c.add(tf, gbc);
+	}
+
+	private boolean wrongDate() {
+		String datum = props.getProperty(p_execDate);
+		SimpleDateFormat sdfToDate = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			Date execDate = sdfToDate.parse(datum);
+			Date now = new Date();
+			if(now.after(execDate)){
+				return true;
+			}
+		} catch (Exception e1) {
+			return true;
+		}
+		return false;
 	}
 }

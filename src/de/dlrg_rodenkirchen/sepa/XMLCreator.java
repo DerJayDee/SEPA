@@ -79,6 +79,7 @@ public class XMLCreator {
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
 		Document doc = docBuilder.newDocument();
+		doc.setXmlStandalone(true);
 		
 		counter = 0;
 
