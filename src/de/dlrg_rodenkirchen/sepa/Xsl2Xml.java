@@ -216,6 +216,15 @@ public class Xsl2Xml extends JFrame {
 			props = new Properties();
 		}
 		try {
+			// remove whitespaces
+			tf_credID.setText(tf_credID.getText().replaceAll("\\s",""));
+			tf_credIBAN.setText(tf_credIBAN.getText().replaceAll("\\s",""));
+			tf_credBIC.setText(tf_credBIC.getText().replaceAll("\\s",""));
+			tf_execDate.setText(tf_execDate.getText().replaceAll("\\s",""));
+			
+			// trim execDate
+			tf_execDate.setText(tf_execDate.getText().substring(0, 10));
+			
 			// set all props
 			props.put(p_credName, tf_credName.getText());
 			props.put(p_credID, tf_credID.getText());
