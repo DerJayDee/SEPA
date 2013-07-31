@@ -2,6 +2,8 @@ package de.dlrg_rodenkirchen.sepa;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,8 +36,6 @@ public class XMLCreator {
 	private static final String p_credIBAN = "credIBAN";
 	private static final String p_credBIC = "credBIC";
 	private static final String p_execDate = "execDate";
-	
-	private int counter;
 
 	private Properties props;
 
@@ -47,26 +47,43 @@ public class XMLCreator {
 		mitglieder = new ArrayList<Mitglied>();
 		File inputWorkbook = xlsFile;
 		Workbook w = Workbook.getWorkbook(inputWorkbook);
-		Sheet sheet = w.getSheet(0);
+		Sheet sheet = w.getSheet(1);
 		for (int i = 1; i < sheet.getRows(); i++) {
+			// Mitgliedsnummer
 			Cell cell = sheet.getCell(0, i);
 			String nr = cell.getContents();
 			if (nr.equals(""))
 				break;
+			// Nachname
 			cell = sheet.getCell(2, i);
 			String name = cell.getContents();
+			// Vorname
 			cell = sheet.getCell(3, i);
 			String vorname = cell.getContents();
+			// IBAN
 			cell = sheet.getCell(20, i);
 			String iban = cell.getContents();
+			// BIC
 			cell = sheet.getCell(21, i);
 			String bic = cell.getContents();
+			// Inhaber
 			cell = sheet.getCell(22, i);
 			String inhaber = cell.getContents();
+			// Mandatsref
+			cell = sheet.getCell(24, i);
+			String mandatsref = cell.getContents();
+			// Betrag
 			cell = sheet.getCell(23, i);
 			String betrag = cell.getContents();
+			betrag = betrag.substring(1);
+			// Zweck1
+			cell = sheet.getCell(25, i);
+			String zweck1 = cell.getContents();
+			// Zweck2
+			cell = sheet.getCell(26, i);
+			String zweck2 = cell.getContents();
 			Mitglied tmp = new Mitglied(nr, name, vorname, iban, bic, inhaber,
-					betrag);
+					mandatsref, betrag, zweck1, zweck2);
 			mitglieder.add(tmp);
 		}
 		return mitglieder.size();
@@ -80,8 +97,6 @@ public class XMLCreator {
 
 		Document doc = docBuilder.newDocument();
 		doc.setXmlStandalone(true);
-		
-		counter = 0;
 
 		// Document
 		Element document = createDocumentElem(doc);
@@ -101,7 +116,7 @@ public class XMLCreator {
 		appendCdtr(pmtInf, doc);
 
 		Element dbtr;
-		for(Mitglied m : mitglieder){
+		for (Mitglied m : mitglieder) {
 			dbtr = createDbtr(m, doc);
 			pmtInf.appendChild(dbtr);
 		}
@@ -116,8 +131,8 @@ public class XMLCreator {
 		StreamResult result = new StreamResult(xmlFile);
 		transformer.transform(source, result);
 	}
-	
-	public void setProps(Properties props){
+
+	public void setProps(Properties props) {
 		this.props = props;
 	}
 
@@ -136,14 +151,13 @@ public class XMLCreator {
 
 	private Element createGrpHdrElem(Document doc) {
 		Element header = doc.createElement("GrpHdr");
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat();
 
 		// MsgID
 		Element msgId = doc.createElement("MsgId");
 		sdf.applyPattern("yyyyMMddHHmmssSS");
-		msgId.appendChild(doc
-				.createTextNode("MID" + sdf.format(new Date())));
+		msgId.appendChild(doc.createTextNode("MID" + sdf.format(new Date())));
 		header.appendChild(msgId);
 
 		// CreDtTm
@@ -174,19 +188,22 @@ public class XMLCreator {
 
 	private String getTotalSum() {
 		double sum = 0.0;
+		NumberFormat format = NumberFormat.getInstance(Locale.GERMAN);
+		Number number;
 		for (Mitglied mitglied : mitglieder) {
-			sum += Double.parseDouble(mitglied.betrag.replace(',', '.'));
+			try {
+				number = format.parse(mitglied.betrag);
+				sum += number.doubleValue();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 		}
-		String sumStr = ""+sum;
-		if(sumStr.substring(sumStr.indexOf('.')).length() <= 3){
-			sumStr += "0";
-		}
-		return sumStr;
+		return String.format(Locale.ENGLISH, "%1$,.2f", sum);
 	}
 
 	private void appendPmtInfHdr(Element pmtInf, Document doc) {
 		SimpleDateFormat sdf = new SimpleDateFormat();
-		
+
 		// PmtInfId
 		Element pmtInfId = doc.createElement("PmtInfId");
 		sdf.applyPattern("yyyyMMddHHmmssSS");
@@ -293,25 +310,40 @@ public class XMLCreator {
 
 	private Element createDbtr(Mitglied m, Document doc) {
 		Element drctDbtTxInf = doc.createElement("DrctDbtTxInf");
-		
+
+		SimpleDateFormat sdf = new SimpleDateFormat();
+
 		// PmtId
 		Element pmtId = doc.createElement("PmtId");
 		Element endToEndId = doc.createElement("EndToEndId");
-		endToEndId.appendChild(doc.createTextNode("EToE" + m.mitgliedsNr));
+		sdf.applyPattern("yyyyMMddHHmmss");
+		endToEndId.appendChild(doc.createTextNode("EToE"
+				+ sdf.format(new Date()) + "-" + m.mitgliedsNr));
 		pmtId.appendChild(endToEndId);
 		drctDbtTxInf.appendChild(pmtId);
-		
+
 		// InstdAmt
 		Element instdAmt = doc.createElement("InstdAmt");
 		instdAmt.setAttribute("Ccy", "EUR");
-		instdAmt.appendChild(doc.createTextNode(String.format(Locale.ENGLISH, "%1$,.2f", Double.parseDouble(m.betrag))));
+		NumberFormat format = NumberFormat.getInstance(Locale.GERMAN);
+		Number number;
+		double betrag = 0.0;
+		try {
+			number = format.parse(m.betrag);
+			betrag = number.doubleValue();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		instdAmt.appendChild(doc.createTextNode(String.format(Locale.ENGLISH,
+				"%1$,.2f", betrag)));
 		drctDbtTxInf.appendChild(instdAmt);
-		
+
 		// DrctDbtTx
 		Element drctDbtTx = doc.createElement("DrctDbtTx");
 		Element mndtRltdInf = doc.createElement("MndtRltdInf");
 		Element mndtId = doc.createElement("MndtId");
-		mndtId.appendChild(doc.createTextNode(m.mitgliedsNr + counter++));
+		mndtId.appendChild(doc.createTextNode(m.mandatsref));
 		mndtRltdInf.appendChild(mndtId);
 		Element dtOfSgntr = doc.createElement("DtOfSgntr");
 		dtOfSgntr.appendChild(doc.createTextNode("2001-01-01"));
@@ -321,7 +353,7 @@ public class XMLCreator {
 		mndtRltdInf.appendChild(amdmntInd);
 		drctDbtTx.appendChild(mndtRltdInf);
 		drctDbtTxInf.appendChild(drctDbtTx);
-		
+
 		// DbtrAgt
 		Element dbtrAgt = doc.createElement("DbtrAgt");
 		Element finInstnId = doc.createElement("FinInstnId");
@@ -330,14 +362,14 @@ public class XMLCreator {
 		finInstnId.appendChild(bic);
 		dbtrAgt.appendChild(finInstnId);
 		drctDbtTxInf.appendChild(dbtrAgt);
-		
+
 		// Dbtr
 		Element dbtr = doc.createElement("Dbtr");
 		Element nm = doc.createElement("Nm");
 		nm.appendChild(doc.createTextNode(m.kontoinhaber));
 		dbtr.appendChild(nm);
 		drctDbtTxInf.appendChild(dbtr);
-		
+
 		// DbtrAcct
 		Element dbtrAcct = doc.createElement("DbtrAcct");
 		Element id = doc.createElement("Id");
@@ -346,11 +378,12 @@ public class XMLCreator {
 		id.appendChild(iban);
 		dbtrAcct.appendChild(id);
 		drctDbtTxInf.appendChild(dbtrAcct);
-		
+
 		// RmtInf
 		Element rmtInf = doc.createElement("RmtInf");
 		Element ustrd = doc.createElement("Ustrd");
-		ustrd.appendChild(doc.createTextNode("Jahresbeitrag DLRG für " + m.vorname + " " + m.name));
+		ustrd.appendChild(doc.createTextNode(m.zweck1 + " " + m.zweck2 + " ("
+				+ m.name + ", " + m.vorname + ")"));
 		rmtInf.appendChild(ustrd);
 		drctDbtTxInf.appendChild(rmtInf);
 
