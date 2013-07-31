@@ -331,9 +331,8 @@ public class XMLCreator {
 		try {
 			number = format.parse(m.betrag);
 			betrag = number.doubleValue();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
 		instdAmt.appendChild(doc.createTextNode(String.format(Locale.ENGLISH,
 				"%1$,.2f", betrag)));
