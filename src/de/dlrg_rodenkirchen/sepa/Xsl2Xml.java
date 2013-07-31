@@ -122,6 +122,10 @@ public class Xsl2Xml extends JFrame {
 								"XML geschrieben",
 								JOptionPane.INFORMATION_MESSAGE);
 					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(c,
+								"Es ist ein Fehler beim Schreiben der XML-Datei aufgetreten.",
+								"Fehler",
+								JOptionPane.ERROR_MESSAGE);
 						e1.printStackTrace();
 					}
 				}

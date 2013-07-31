@@ -11,9 +11,7 @@ import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -88,8 +86,7 @@ public class XMLCreator {
 		return mitglieder.size();
 	}
 
-	public void writeXML(File xmlFile) throws ParserConfigurationException,
-			TransformerException {
+	public void writeXML(File xmlFile) throws Exception {
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory
 				.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -148,7 +145,7 @@ public class XMLCreator {
 		return root;
 	}
 
-	private Element createGrpHdrElem(Document doc) {
+	private Element createGrpHdrElem(Document doc) throws Exception{
 		Element header = doc.createElement("GrpHdr");
 
 		SimpleDateFormat sdf = new SimpleDateFormat();
@@ -185,22 +182,18 @@ public class XMLCreator {
 		return header;
 	}
 
-	private String getTotalSum() {
+	private String getTotalSum() throws Exception {
 		double sum = 0.0;
 		NumberFormat format = NumberFormat.getInstance(Locale.GERMAN);
 		Number number;
 		for (Mitglied mitglied : mitglieder) {
-			try {
-				number = format.parse(mitglied.betrag);
-				sum += number.doubleValue();
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
+			number = format.parse(mitglied.betrag);
+			sum += number.doubleValue();
 		}
 		return String.format(Locale.ENGLISH, "%1$,.2f", sum);
 	}
 
-	private void appendPmtInfHdr(Element pmtInf, Document doc) {
+	private void appendPmtInfHdr(Element pmtInf, Document doc) throws Exception{
 		SimpleDateFormat sdf = new SimpleDateFormat();
 
 		// PmtInfId
@@ -307,7 +300,7 @@ public class XMLCreator {
 		pmtInf.appendChild(cdtrSchmeId);
 	}
 
-	private Element createDbtr(Mitglied m, Document doc) {
+	private Element createDbtr(Mitglied m, Document doc) throws Exception {
 		Element drctDbtTxInf = doc.createElement("DrctDbtTxInf");
 
 		SimpleDateFormat sdf = new SimpleDateFormat();
@@ -327,12 +320,8 @@ public class XMLCreator {
 		NumberFormat format = NumberFormat.getInstance(Locale.GERMAN);
 		Number number;
 		double betrag = 0.0;
-		try {
-			number = format.parse(m.betrag);
-			betrag = number.doubleValue();
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
+		number = format.parse(m.betrag);
+		betrag = number.doubleValue();
 		instdAmt.appendChild(doc.createTextNode(String.format(Locale.ENGLISH,
 				"%1$,.2f", betrag)));
 		drctDbtTxInf.appendChild(instdAmt);
