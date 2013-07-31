@@ -1,7 +1,6 @@
 package de.dlrg_rodenkirchen.sepa;
 
 public class Mitglied {
-	// TODO
 	String mitgliedsNr;
 	String name;
 	String vorname;
