@@ -40,11 +40,11 @@ public class XMLCreator {
 		this.props = props;
 	}
 
-	public int readExcel(File xlsFile) throws BiffException, IOException {
+	public int readExcel(File xlsFile, int excelSheet) throws BiffException, IOException {
 		mitglieder = new ArrayList<Mitglied>();
 		File inputWorkbook = xlsFile;
 		Workbook w = Workbook.getWorkbook(inputWorkbook);
-		Sheet sheet = w.getSheet(1);
+		Sheet sheet = w.getSheet(excelSheet);
 		for (int i = 1; i < sheet.getRows(); i++) {
 			// Mitgliedsnummer
 			Cell cell = sheet.getCell(0, i);

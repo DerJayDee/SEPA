@@ -35,12 +35,14 @@ public class Xsl2Xml extends JFrame {
 	private static final String p_credIBAN = "credIBAN";
 	private static final String p_credBIC = "credBIC";
 	private static final String p_execDate = "execDate";
+	private static final String p_excelSheet = "excelSheet";
 
 	private static final String tfl_credName = "Gläubiger:";
 	private static final String tfl_credID = "Gläubiger-ID:";
 	private static final String tfl_credIBAN = "Gläubiger-IBAN:";
 	private static final String tfl_credBIC = "Gläubiger-BIC:";
 	private static final String tfl_execDate = "Datum der Ausführung:";
+	private static final String tfl_excelSheet = "Excel Sheet Nr.:";
 
 	private JButton open = new JButton("XLS-Datei öffnen...");
 	private JButton save = new JButton("XML-Datei speichern unter...");
@@ -50,6 +52,7 @@ public class Xsl2Xml extends JFrame {
 	private JTextField tf_credIBAN;
 	private JTextField tf_credBIC;
 	private JTextField tf_execDate;
+	private JTextField tf_excelSheet;
 
 	private Properties props;
 
@@ -64,30 +67,53 @@ public class Xsl2Xml extends JFrame {
 
 	class OpenXLSListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			saveProps();
 			JFileChooser c = new JFileChooser();
-			FileFilter xlsff = new XLSFilter();
-			c.addChoosableFileFilter(xlsff);
-			c.setFileFilter(xlsff);
-			int rVal = c.showOpenDialog(Xsl2Xml.this);
-			if (rVal == JFileChooser.APPROVE_OPTION) {
-				if (xmlc == null) {
-					xmlc = new XMLCreator(props);
-				}
-				try {
-					int count = xmlc.readExcel(c.getSelectedFile());
-					if (count > 0) {
-						save.setEnabled(true);
-						JOptionPane.showMessageDialog(c,
-								"Anzahl eingelesene Einträge: " + count,
-								"XLS eingelesen",
-								JOptionPane.INFORMATION_MESSAGE);
-					} else {
-						JOptionPane.showMessageDialog(c,
-								"Keine Einträge gefunden", "Fehler",
-								JOptionPane.ERROR_MESSAGE);
+			if (tf_credName.getText().equals("")
+					|| tf_credID.getText().equals("")
+					|| tf_credIBAN.getText().equals("")
+					|| tf_credBIC.getText().equals("")
+					|| tf_execDate.getText().equals("")
+					|| tf_excelSheet.getText().equals("")) {
+				JOptionPane.showMessageDialog(c,
+						"Sie müssen alle Werte eingeben", "Fehlende Werte",
+						JOptionPane.ERROR_MESSAGE);
+			} else if (wrongDate()) {
+				JOptionPane
+						.showMessageDialog(
+								c,
+								"Das Datum muss im Format 'yyyy-mm-dd' eingegeben werden und in der Zukunft liegen.",
+								"Ungültiges Datum", JOptionPane.ERROR_MESSAGE);
+			} else if (notInt()) {
+				JOptionPane.showMessageDialog(c,
+						"Die Nummer des Excel Sheets muss eine Zahl sein.",
+						"Ungültiges Excel Sheet", JOptionPane.ERROR_MESSAGE);
+			} else {
+				FileFilter xlsff = new XLSFilter();
+				c.addChoosableFileFilter(xlsff);
+				c.setFileFilter(xlsff);
+				int rVal = c.showOpenDialog(Xsl2Xml.this);
+				if (rVal == JFileChooser.APPROVE_OPTION) {
+					if (xmlc == null) {
+						xmlc = new XMLCreator(props);
 					}
-				} catch (Exception e1) {
-					e1.printStackTrace();
+					try {
+						int excelSheetInt = Integer.parseInt(props.getProperty(p_excelSheet));
+						int count = xmlc.readExcel(c.getSelectedFile(), excelSheetInt);
+						if (count > 0) {
+							save.setEnabled(true);
+							JOptionPane.showMessageDialog(c,
+									"Anzahl eingelesene Einträge: " + count,
+									"XLS eingelesen",
+									JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							JOptionPane.showMessageDialog(c,
+									"Keine Einträge gefunden", "Fehler",
+									JOptionPane.ERROR_MESSAGE);
+						}
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
 				}
 			}
 		}
@@ -101,7 +127,8 @@ public class Xsl2Xml extends JFrame {
 					|| tf_credID.getText().equals("")
 					|| tf_credIBAN.getText().equals("")
 					|| tf_credBIC.getText().equals("")
-					|| tf_execDate.getText().equals("")) {
+					|| tf_execDate.getText().equals("")
+					|| tf_excelSheet.getText().equals("")) {
 				JOptionPane.showMessageDialog(c,
 						"Sie müssen alle Werte eingeben", "Fehlende Werte",
 						JOptionPane.ERROR_MESSAGE);
@@ -111,6 +138,10 @@ public class Xsl2Xml extends JFrame {
 								c,
 								"Das Datum muss im Format 'yyyy-mm-dd' eingegeben werden und in der Zukunft liegen.",
 								"Ungültiges Datum", JOptionPane.ERROR_MESSAGE);
+			} else if (notInt()) {
+				JOptionPane.showMessageDialog(c,
+						"Die Nummer des Excel Sheets muss eine Zahl sein.",
+						"Ungültiges Excel Sheet", JOptionPane.ERROR_MESSAGE);
 			} else {
 				int rVal = c.showSaveDialog(Xsl2Xml.this);
 				if (rVal == JFileChooser.APPROVE_OPTION) {
@@ -122,10 +153,11 @@ public class Xsl2Xml extends JFrame {
 								"XML geschrieben",
 								JOptionPane.INFORMATION_MESSAGE);
 					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(c,
-								"Es ist ein Fehler beim Schreiben der XML-Datei aufgetreten.",
-								"Fehler",
-								JOptionPane.ERROR_MESSAGE);
+						JOptionPane
+								.showMessageDialog(
+										c,
+										"Es ist ein Fehler beim Schreiben der XML-Datei aufgetreten.",
+										"Fehler", JOptionPane.ERROR_MESSAGE);
 						e1.printStackTrace();
 					}
 				}
@@ -175,7 +207,7 @@ public class Xsl2Xml extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		run(new Xsl2Xml(), 400, 200);
+		run(new Xsl2Xml(), 400, 220);
 	}
 
 	public static void run(JFrame frame, int width, int height) {
@@ -216,7 +248,8 @@ public class Xsl2Xml extends JFrame {
 		tf_credIBAN.setText(tf_credIBAN.getText().replaceAll("\\s", ""));
 		tf_credBIC.setText(tf_credBIC.getText().replaceAll("\\s", ""));
 		tf_execDate.setText(tf_execDate.getText().replaceAll("\\s", ""));
-		
+		tf_excelSheet.setText(tf_excelSheet.getText().replaceAll("\\s", ""));
+
 		try {
 			// trim execDate
 			tf_execDate.setText(tf_execDate.getText().substring(0, 10));
@@ -227,6 +260,7 @@ public class Xsl2Xml extends JFrame {
 			props.put(p_credIBAN, tf_credIBAN.getText());
 			props.put(p_credBIC, tf_credBIC.getText());
 			props.put(p_execDate, tf_execDate.getText());
+			props.put(p_excelSheet, tf_excelSheet.getText());
 			// save properties to project root folder
 			props.store(new FileOutputStream(propsName), null);
 
@@ -273,6 +307,10 @@ public class Xsl2Xml extends JFrame {
 		addLabel(tfl_execDate, p1, 0, 4);
 		addTextField(tf_execDate = new JTextField(
 				props.getProperty(p_execDate), 20), p1, 1, 4);
+		
+		// excelSheet
+		addLabel(tfl_excelSheet, p1, 0, 5);
+		addTextField(tf_excelSheet = new JTextField(props.getProperty(p_excelSheet)), p1, 1, 5);
 
 		// ButtonPannel
 		// Buttons
@@ -331,5 +369,10 @@ public class Xsl2Xml extends JFrame {
 			return true;
 		}
 		return false;
+	}
+
+	private boolean notInt() {
+		String excelSheet = props.getProperty(p_excelSheet);
+		return !excelSheet.matches("[0-9]+");
 	}
 }
