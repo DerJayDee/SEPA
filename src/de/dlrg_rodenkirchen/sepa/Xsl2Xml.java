@@ -113,6 +113,9 @@ public class Xsl2Xml extends JFrame {
 						}
 					} catch (Exception e1) {
 						e1.printStackTrace();
+						JOptionPane.showMessageDialog(c,
+								"Ein Fehler beim Lesen der Excel-Date ist aufgetreten.", "Fehler",
+								JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
