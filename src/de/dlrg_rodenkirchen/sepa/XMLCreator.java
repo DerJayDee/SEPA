@@ -204,7 +204,7 @@ public class XMLCreator {
 			number = format.parse(mitglied.betrag);
 			sum += number.doubleValue();
 		}
-		return String.format(Locale.ENGLISH, "%1$,.2f", sum);
+		return String.format(Locale.ENGLISH, "%1$.2f", sum);
 	}
 
 	private void appendPmtInfHdr(Element pmtInf, Document doc) throws Exception {
@@ -337,7 +337,7 @@ public class XMLCreator {
 		number = format.parse(m.betrag);
 		betrag = number.doubleValue();
 		instdAmt.appendChild(doc.createTextNode(String.format(Locale.ENGLISH,
-				"%1$,.2f", betrag)));
+				"%1$.2f", betrag)));
 		drctDbtTxInf.appendChild(instdAmt);
 
 		// DrctDbtTx
@@ -347,7 +347,7 @@ public class XMLCreator {
 		mndtId.appendChild(doc.createTextNode(m.mandatsref));
 		mndtRltdInf.appendChild(mndtId);
 		Element dtOfSgntr = doc.createElement("DtOfSgntr");
-		dtOfSgntr.appendChild(doc.createTextNode("2001-01-01"));
+		dtOfSgntr.appendChild(doc.createTextNode("2012-01-01"));
 		mndtRltdInf.appendChild(dtOfSgntr);
 		Element amdmntInd = doc.createElement("AmdmntInd");
 		amdmntInd.appendChild(doc.createTextNode("false"));

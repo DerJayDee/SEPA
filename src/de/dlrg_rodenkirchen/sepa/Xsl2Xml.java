@@ -70,6 +70,9 @@ public class Xsl2Xml extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			saveProps();
 			JFileChooser c = new JFileChooser();
+			File f = new File(System.getProperty("java.class.path"));
+			File dir = f.getAbsoluteFile().getParentFile();
+			c.setCurrentDirectory(dir);
 			if (tf_credName.getText().equals("")
 					|| tf_credID.getText().equals("")
 					|| tf_credIBAN.getText().equals("")
@@ -134,6 +137,9 @@ public class Xsl2Xml extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			saveProps();
 			JFileChooser c = new JFileChooser();
+			File f = new File(System.getProperty("java.class.path"));
+			File dir = f.getAbsoluteFile().getParentFile();
+			c.setCurrentDirectory(dir);
 			if (tf_credName.getText().equals("")
 					|| tf_credID.getText().equals("")
 					|| tf_credIBAN.getText().equals("")
