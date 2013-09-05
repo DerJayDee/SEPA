@@ -10,6 +10,7 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -95,7 +96,14 @@ public class Xsl2Xml extends JFrame {
 				int rVal = c.showOpenDialog(Xsl2Xml.this);
 				if (rVal == JFileChooser.APPROVE_OPTION) {
 					if (xmlc == null) {
-						xmlc = new XMLCreator(props);
+						try {
+							xmlc = new XMLCreator(props);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+							JOptionPane.showMessageDialog(c,
+									"Ein Fehler beim Einlesen der Zuordnungskonfiguration ist aufgetreten.", "Fehler",
+									JOptionPane.ERROR_MESSAGE);
+						}
 					}
 					try {
 						int excelSheetInt = Integer.parseInt(props.getProperty(p_excelSheet));

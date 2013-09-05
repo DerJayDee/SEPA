@@ -9,11 +9,10 @@ public class Mitglied {
 	String kontoinhaber;
 	String mandatsref;
 	String betrag;
-	String zweck1;
-	String zweck2;
+	String zweck;
 
 	public Mitglied(String nr, String name, String vorname, String iban,
-			String bic, String inhaber, String mandatsref, String betrag, String zweck1, String zweck2) {
+			String bic, String inhaber, String mandatsref, String betrag, String zweck) {
 		this.mitgliedsNr = nr;
 		this.name = name;
 		this.vorname = vorname;
@@ -22,7 +21,6 @@ public class Mitglied {
 		this.kontoinhaber = inhaber;
 		this.mandatsref = mandatsref;
 		this.betrag = betrag;
-		this.zweck1 = zweck1;
-		this.zweck2 = zweck2;
+		this.zweck = zweck;
 	}
 }
