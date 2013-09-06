@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,6 +42,7 @@ public class XMLCreator {
 	private static final String z_nummer = "mitgliedsnummer";
 	private static final String z_nachname = "nachname";
 	private static final String z_vorname = "vorname";
+	private static final String z_eintritt = "eintrittsdatum";
 	private static final String z_iban = "iban";
 	private static final String z_bic = "bic";
 	private static final String z_kontoinhaber = "kontoinhaber";
@@ -57,44 +59,63 @@ public class XMLCreator {
 	}
 
 	public int readExcel(File xlsFile, int excelSheet) throws BiffException,
-			IOException, NumberFormatException {
+			IOException, NumberFormatException, ParseException {
 		mitglieder = new ArrayList<Mitglied>();
 		File inputWorkbook = xlsFile;
 		Workbook w = Workbook.getWorkbook(inputWorkbook);
 		Sheet sheet = w.getSheet(excelSheet);
 		for (int i = 1; i < sheet.getRows(); i++) {
 			// Mitgliedsnummer
-			Cell cell = sheet.getCell(Integer.parseInt(zuordnung.getProperty(z_nummer)), i);
+			Cell cell = sheet.getCell(
+					Integer.parseInt(zuordnung.getProperty(z_nummer)), i);
 			String nr = cell.getContents();
 			if (nr.equals(""))
 				break;
 			// Nachname
-			cell = sheet.getCell(Integer.parseInt(zuordnung.getProperty(z_nachname)), i);
+			cell = sheet.getCell(
+					Integer.parseInt(zuordnung.getProperty(z_nachname)), i);
 			String name = cell.getContents();
 			// Vorname
-			cell = sheet.getCell(Integer.parseInt(zuordnung.getProperty(z_vorname)), i);
+			cell = sheet.getCell(
+					Integer.parseInt(zuordnung.getProperty(z_vorname)), i);
 			String vorname = cell.getContents();
+			// Eintrittsdatum
+			cell = sheet.getCell(
+					Integer.parseInt(zuordnung.getProperty(z_eintritt)), i);
+			String eintritt = cell.getContents();
+			SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yy");
+			Date eintritt_datum = sdf.parse(eintritt);
+			sdf.applyPattern("yyyy-MM-dd");
+			eintritt = sdf.format(eintritt_datum);
 			// IBAN
-			cell = sheet.getCell(Integer.parseInt(zuordnung.getProperty(z_iban)), i);
+			cell = sheet.getCell(
+					Integer.parseInt(zuordnung.getProperty(z_iban)), i);
 			String iban = cell.getContents();
 			// BIC
-			cell = sheet.getCell(Integer.parseInt(zuordnung.getProperty(z_bic)), i);
+			cell = sheet.getCell(
+					Integer.parseInt(zuordnung.getProperty(z_bic)), i);
 			String bic = cell.getContents();
 			// Inhaber
-			cell = sheet.getCell(Integer.parseInt(zuordnung.getProperty(z_kontoinhaber)), i);
+			cell = sheet.getCell(
+					Integer.parseInt(zuordnung.getProperty(z_kontoinhaber)), i);
 			String inhaber = cell.getContents();
 			// Mandatsref
-			cell = sheet.getCell(Integer.parseInt(zuordnung.getProperty(z_mandatsreferenz)), i);
+			cell = sheet.getCell(
+					Integer.parseInt(zuordnung.getProperty(z_mandatsreferenz)),
+					i);
 			String mandatsref = cell.getContents();
 			// Betrag
-			cell = sheet.getCell(Integer.parseInt(zuordnung.getProperty(z_beitrag)), i);
+			cell = sheet.getCell(
+					Integer.parseInt(zuordnung.getProperty(z_beitrag)), i);
 			String betrag = cell.getContents();
 			betrag = betrag.substring(1);
 			// Zweck
-			cell = sheet.getCell(Integer.parseInt(zuordnung.getProperty(z_verwendungszweck)), i);
-			String zweck1 = cell.getContents();
-			Mitglied tmp = new Mitglied(nr, name, vorname, iban, bic, inhaber,
-					mandatsref, betrag, zweck1);
+			cell = sheet
+					.getCell(Integer.parseInt(zuordnung
+							.getProperty(z_verwendungszweck)), i);
+			String zweck = cell.getContents();
+			Mitglied tmp = new Mitglied(nr, name, vorname, eintritt, iban, bic,
+					inhaber, mandatsref, betrag, zweck);
 			mitglieder.add(tmp);
 		}
 		return mitglieder.size();
@@ -347,7 +368,7 @@ public class XMLCreator {
 		mndtId.appendChild(doc.createTextNode(m.mandatsref));
 		mndtRltdInf.appendChild(mndtId);
 		Element dtOfSgntr = doc.createElement("DtOfSgntr");
-		dtOfSgntr.appendChild(doc.createTextNode("2012-01-01"));
+		dtOfSgntr.appendChild(doc.createTextNode(m.eintritt));
 		mndtRltdInf.appendChild(dtOfSgntr);
 		Element amdmntInd = doc.createElement("AmdmntInd");
 		amdmntInd.appendChild(doc.createTextNode("false"));
