@@ -1,11 +1,8 @@
-package de.dlrg_rodenkirchen.sepa;
+package de.dlrg_rodenkirchen.sepa.xml;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,109 +16,23 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.read.biff.BiffException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class XMLCreator {
+import de.dlrg_rodenkirchen.sepa.helper.Person;
+import de.dlrg_rodenkirchen.sepa.helper.Strings;
+import de.dlrg_rodenkirchen.sepa.interfaces.Writer;
 
-	private ArrayList<Person> mitglieder;
-
-	private static final String p_credName = "credName";
-	private static final String p_credID = "credId";
-	private static final String p_credIBAN = "credIBAN";
-	private static final String p_credBIC = "credBIC";
-	private static final String p_execDate = "execDate";
-
-	private static final String zuordnungsPropsName = "SEPA_Zuordnung.cfg";
-
-	private static final String z_nummer = "mitgliedsnummer";
-	private static final String z_nachname = "nachname";
-	private static final String z_vorname = "vorname";
-	private static final String z_eintritt = "eintrittsdatum";
-	private static final String z_iban = "iban";
-	private static final String z_bic = "bic";
-	private static final String z_kontoinhaber = "kontoinhaber";
-	private static final String z_beitrag = "beitrag";
-	private static final String z_mandatsreferenz = "mandatsreferenz";
-	private static final String z_verwendungszweck = "verwendungszweck";
+public class XMLWriter implements Writer {
 
 	private Properties props;
-	private Properties zuordnung;
 
-	public XMLCreator(Properties props) throws IOException {
+	public XMLWriter(Properties props) throws IOException {
 		this.props = props;
-		loadProps();
 	}
 
-	public int readExcel(File xlsFile, int excelSheet) throws BiffException,
-			IOException, NumberFormatException, ParseException {
-		mitglieder = new ArrayList<Person>();
-		File inputWorkbook = xlsFile;
-		Workbook w = Workbook.getWorkbook(inputWorkbook);
-		Sheet sheet = w.getSheet(excelSheet);
-		for (int i = 1; i < sheet.getRows(); i++) {
-			// Mitgliedsnummer
-			Cell cell = sheet.getCell(
-					Integer.parseInt(zuordnung.getProperty(z_nummer)), i);
-			String nr = cell.getContents();
-			if (nr.equals(""))
-				break;
-			// Nachname
-			cell = sheet.getCell(
-					Integer.parseInt(zuordnung.getProperty(z_nachname)), i);
-			String name = cell.getContents();
-			// Vorname
-			cell = sheet.getCell(
-					Integer.parseInt(zuordnung.getProperty(z_vorname)), i);
-			String vorname = cell.getContents();
-			// Eintrittsdatum
-			cell = sheet.getCell(
-					Integer.parseInt(zuordnung.getProperty(z_eintritt)), i);
-			String eintritt = cell.getContents();
-			SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yy");
-			Date eintritt_datum = sdf.parse(eintritt);
-			sdf.applyPattern("yyyy-MM-dd");
-			eintritt = sdf.format(eintritt_datum);
-			// IBAN
-			cell = sheet.getCell(
-					Integer.parseInt(zuordnung.getProperty(z_iban)), i);
-			String iban = cell.getContents();
-			// BIC
-			cell = sheet.getCell(
-					Integer.parseInt(zuordnung.getProperty(z_bic)), i);
-			String bic = cell.getContents();
-			// Inhaber
-			cell = sheet.getCell(
-					Integer.parseInt(zuordnung.getProperty(z_kontoinhaber)), i);
-			String inhaber = cell.getContents();
-			// Mandatsref
-			cell = sheet.getCell(
-					Integer.parseInt(zuordnung.getProperty(z_mandatsreferenz)),
-					i);
-			String mandatsref = cell.getContents();
-			// Betrag
-			cell = sheet.getCell(
-					Integer.parseInt(zuordnung.getProperty(z_beitrag)), i);
-			String betrag = cell.getContents();
-			betrag = betrag.substring(1);
-			// Zweck
-			cell = sheet
-					.getCell(Integer.parseInt(zuordnung
-							.getProperty(z_verwendungszweck)), i);
-			String zweck = cell.getContents();
-			Person tmp = new Person(nr, name, vorname, eintritt, iban, bic,
-					inhaber, mandatsref, betrag, zweck);
-			mitglieder.add(tmp);
-		}
-		return mitglieder.size();
-	}
-
-	public void writeXML(File xmlFile) throws Exception {
+	public final void write(File xmlFile, ArrayList<Person> persons)
+			throws Exception {
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory
 				.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -138,17 +49,17 @@ public class XMLCreator {
 		document.appendChild(root);
 
 		// GrpHdr
-		Element header = createGrpHdrElem(doc);
+		Element header = createGrpHdrElem(doc, persons);
 		root.appendChild(header);
 
 		// PmtInf
 		Element pmtInf = doc.createElement("PmtInf");
-		appendPmtInfHdr(pmtInf, doc);
+		appendPmtInfHdr(pmtInf, doc, persons);
 		appendCdtr(pmtInf, doc);
 
 		Element dbtr;
-		for (Person m : mitglieder) {
-			dbtr = createDbtr(m, doc);
+		for (Person p : persons) {
+			dbtr = createDbtr(p, doc);
 			pmtInf.appendChild(dbtr);
 		}
 
@@ -163,11 +74,11 @@ public class XMLCreator {
 		transformer.transform(source, result);
 	}
 
-	public void setProps(Properties props) {
+	public final void setProps(Properties props) {
 		this.props = props;
 	}
 
-	private Element createDocumentElem(Document doc) {
+	private final Element createDocumentElem(Document doc) {
 		Element root = doc.createElement("Document");
 		// Namespaces
 		root.setAttribute("xmlns",
@@ -180,7 +91,8 @@ public class XMLCreator {
 		return root;
 	}
 
-	private Element createGrpHdrElem(Document doc) throws Exception {
+	private final Element createGrpHdrElem(Document doc,
+			ArrayList<Person> persons) throws Exception {
 		Element header = doc.createElement("GrpHdr");
 
 		SimpleDateFormat sdf = new SimpleDateFormat();
@@ -199,36 +111,38 @@ public class XMLCreator {
 
 		// NbOfTxs
 		Element nbOfTxs = doc.createElement("NbOfTxs");
-		nbOfTxs.appendChild(doc.createTextNode("" + mitglieder.size()));
+		nbOfTxs.appendChild(doc.createTextNode("" + persons.size()));
 		header.appendChild(nbOfTxs);
 
 		// CtrlSum
 		Element ctrlSum = doc.createElement("CtrlSum");
-		ctrlSum.appendChild(doc.createTextNode(getTotalSum()));
+		ctrlSum.appendChild(doc.createTextNode(getTotalSum(persons)));
 		header.appendChild(ctrlSum);
 
 		// InitgPty
 		Element initgPty = doc.createElement("InitgPty");
 		Element nm = doc.createElement("Nm");
-		nm.appendChild(doc.createTextNode(props.getProperty(p_credName)));
+		nm.appendChild(doc.createTextNode(props.getProperty(Strings.P_CRED_NAME.toString())));
 		initgPty.appendChild(nm);
 		header.appendChild(initgPty);
 
 		return header;
 	}
 
-	private String getTotalSum() throws Exception {
+	private final String getTotalSum(ArrayList<Person> persons)
+			throws Exception {
 		double sum = 0.0;
 		NumberFormat format = NumberFormat.getInstance(Locale.GERMAN);
 		Number number;
-		for (Person mitglied : mitglieder) {
-			number = format.parse(mitglied.betrag);
+		for (Person person : persons) {
+			number = format.parse(person.getBetrag());
 			sum += number.doubleValue();
 		}
 		return String.format(Locale.ENGLISH, "%1$.2f", sum);
 	}
 
-	private void appendPmtInfHdr(Element pmtInf, Document doc) throws Exception {
+	private final void appendPmtInfHdr(Element pmtInf, Document doc,
+			ArrayList<Person> persons) throws Exception {
 		SimpleDateFormat sdf = new SimpleDateFormat();
 
 		// PmtInfId
@@ -249,12 +163,12 @@ public class XMLCreator {
 
 		// NbOfTxs
 		Element nbOfTxs = doc.createElement("NbOfTxs");
-		nbOfTxs.appendChild(doc.createTextNode("" + mitglieder.size()));
+		nbOfTxs.appendChild(doc.createTextNode("" + persons.size()));
 		pmtInf.appendChild(nbOfTxs);
 
 		// CtrlSum
 		Element ctrlSum = doc.createElement("CtrlSum");
-		ctrlSum.appendChild(doc.createTextNode(getTotalSum()));
+		ctrlSum.appendChild(doc.createTextNode(getTotalSum(persons)));
 		pmtInf.appendChild(ctrlSum);
 
 		// PmtTpInf
@@ -281,15 +195,15 @@ public class XMLCreator {
 		// ReqdColltnDt
 		Element reqdColltnDt = doc.createElement("ReqdColltnDt");
 		reqdColltnDt.appendChild(doc.createTextNode(props
-				.getProperty(p_execDate)));
+				.getProperty(Strings.P_EXEC_DATE.toString())));
 		pmtInf.appendChild(reqdColltnDt);
 	}
 
-	private void appendCdtr(Element pmtInf, Document doc) {
+	private final void appendCdtr(Element pmtInf, Document doc) {
 		// Cdtr
 		Element cdtr = doc.createElement("Cdtr");
 		Element nm = doc.createElement("Nm");
-		nm.appendChild(doc.createTextNode(props.getProperty(p_credName)));
+		nm.appendChild(doc.createTextNode(props.getProperty(Strings.P_CRED_NAME.toString())));
 		cdtr.appendChild(nm);
 		pmtInf.appendChild(cdtr);
 
@@ -297,7 +211,7 @@ public class XMLCreator {
 		Element cdtrAcct = doc.createElement("CdtrAcct");
 		Element id1 = doc.createElement("Id");
 		Element iban = doc.createElement("IBAN");
-		iban.appendChild(doc.createTextNode(props.getProperty(p_credIBAN)));
+		iban.appendChild(doc.createTextNode(props.getProperty(Strings.P_CRED_IBAN.toString())));
 		id1.appendChild(iban);
 		cdtrAcct.appendChild(id1);
 		pmtInf.appendChild(cdtrAcct);
@@ -306,7 +220,7 @@ public class XMLCreator {
 		Element cdtrAgt = doc.createElement("CdtrAgt");
 		Element finInstnId = doc.createElement("FinInstnId");
 		Element bic = doc.createElement("BIC");
-		bic.appendChild(doc.createTextNode(props.getProperty(p_credBIC)));
+		bic.appendChild(doc.createTextNode(props.getProperty(Strings.P_CRED_BIC.toString())));
 		finInstnId.appendChild(bic);
 		cdtrAgt.appendChild(finInstnId);
 		pmtInf.appendChild(cdtrAgt);
@@ -322,7 +236,7 @@ public class XMLCreator {
 		Element prvtId = doc.createElement("PrvtId");
 		Element othr = doc.createElement("Othr");
 		Element id3 = doc.createElement("Id");
-		id3.appendChild(doc.createTextNode(props.getProperty(p_credID)));
+		id3.appendChild(doc.createTextNode(props.getProperty(Strings.P_CRED_ID.toString())));
 		Element schmeNm = doc.createElement("SchmeNm");
 		Element prtry = doc.createElement("Prtry");
 		prtry.appendChild(doc.createTextNode("SEPA"));
@@ -335,7 +249,7 @@ public class XMLCreator {
 		pmtInf.appendChild(cdtrSchmeId);
 	}
 
-	private Element createDbtr(Person m, Document doc) throws Exception {
+	private final Element createDbtr(Person p, Document doc) throws Exception {
 		Element drctDbtTxInf = doc.createElement("DrctDbtTxInf");
 
 		SimpleDateFormat sdf = new SimpleDateFormat();
@@ -345,7 +259,7 @@ public class XMLCreator {
 		Element endToEndId = doc.createElement("EndToEndId");
 		sdf.applyPattern("yyyyMMddHHmmss");
 		endToEndId.appendChild(doc.createTextNode("EToE"
-				+ sdf.format(new Date()) + "-" + m.number));
+				+ sdf.format(new Date()) + "-" + p.getNumber()));
 		pmtId.appendChild(endToEndId);
 		drctDbtTxInf.appendChild(pmtId);
 
@@ -355,7 +269,7 @@ public class XMLCreator {
 		NumberFormat format = NumberFormat.getInstance(Locale.GERMAN);
 		Number number;
 		double betrag = 0.0;
-		number = format.parse(m.betrag);
+		number = format.parse(p.getBetrag());
 		betrag = number.doubleValue();
 		instdAmt.appendChild(doc.createTextNode(String.format(Locale.ENGLISH,
 				"%1$.2f", betrag)));
@@ -365,10 +279,10 @@ public class XMLCreator {
 		Element drctDbtTx = doc.createElement("DrctDbtTx");
 		Element mndtRltdInf = doc.createElement("MndtRltdInf");
 		Element mndtId = doc.createElement("MndtId");
-		mndtId.appendChild(doc.createTextNode(m.mandatsref));
+		mndtId.appendChild(doc.createTextNode(p.getMandatsref()));
 		mndtRltdInf.appendChild(mndtId);
 		Element dtOfSgntr = doc.createElement("DtOfSgntr");
-		dtOfSgntr.appendChild(doc.createTextNode(m.unterschrieben));
+		dtOfSgntr.appendChild(doc.createTextNode(p.getUnterschrieben()));
 		mndtRltdInf.appendChild(dtOfSgntr);
 		Element amdmntInd = doc.createElement("AmdmntInd");
 		amdmntInd.appendChild(doc.createTextNode("false"));
@@ -380,7 +294,7 @@ public class XMLCreator {
 		Element dbtrAgt = doc.createElement("DbtrAgt");
 		Element finInstnId = doc.createElement("FinInstnId");
 		Element bic = doc.createElement("BIC");
-		bic.appendChild(doc.createTextNode(m.bic));
+		bic.appendChild(doc.createTextNode(p.getBic()));
 		finInstnId.appendChild(bic);
 		dbtrAgt.appendChild(finInstnId);
 		drctDbtTxInf.appendChild(dbtrAgt);
@@ -388,7 +302,7 @@ public class XMLCreator {
 		// Dbtr
 		Element dbtr = doc.createElement("Dbtr");
 		Element nm = doc.createElement("Nm");
-		nm.appendChild(doc.createTextNode(m.kontoinhaber));
+		nm.appendChild(doc.createTextNode(p.getKontoinhaber()));
 		dbtr.appendChild(nm);
 		drctDbtTxInf.appendChild(dbtr);
 
@@ -396,7 +310,7 @@ public class XMLCreator {
 		Element dbtrAcct = doc.createElement("DbtrAcct");
 		Element id = doc.createElement("Id");
 		Element iban = doc.createElement("IBAN");
-		iban.appendChild(doc.createTextNode(m.iban));
+		iban.appendChild(doc.createTextNode(p.getIban()));
 		id.appendChild(iban);
 		dbtrAcct.appendChild(id);
 		drctDbtTxInf.appendChild(dbtrAcct);
@@ -404,27 +318,10 @@ public class XMLCreator {
 		// RmtInf
 		Element rmtInf = doc.createElement("RmtInf");
 		Element ustrd = doc.createElement("Ustrd");
-		ustrd.appendChild(doc.createTextNode(m.zweck));
+		ustrd.appendChild(doc.createTextNode(p.getZweck()));
 		rmtInf.appendChild(ustrd);
 		drctDbtTxInf.appendChild(rmtInf);
 
 		return drctDbtTxInf;
-	}
-
-	@SuppressWarnings("resource")
-	private void loadProps() throws IOException {
-		if (zuordnung == null) {
-			zuordnung = new Properties();
-		}
-		InputStream in;
-		File propsFile = new File(zuordnungsPropsName);
-		if (propsFile.exists()) {
-			in = new FileInputStream(propsFile);
-		} else {
-			in = Xsl2Xml.class.getClassLoader().getResourceAsStream(
-					zuordnungsPropsName);
-		}
-		zuordnung.load(in);
-		in.close();
 	}
 }

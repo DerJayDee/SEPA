@@ -1,4 +1,4 @@
-package de.dlrg_rodenkirchen.sepa;
+package de.dlrg_rodenkirchen.sepa.xls;
 
 import java.io.File;
 

@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
@@ -26,27 +27,20 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 
+import de.dlrg_rodenkirchen.sepa.helper.Person;
+import de.dlrg_rodenkirchen.sepa.helper.Strings;
+import de.dlrg_rodenkirchen.sepa.interfaces.Reader;
+import de.dlrg_rodenkirchen.sepa.interfaces.Writer;
+import de.dlrg_rodenkirchen.sepa.xls.XLSFilter;
+import de.dlrg_rodenkirchen.sepa.xls.XLSReader;
+import de.dlrg_rodenkirchen.sepa.xml.XMLWriter;
+
 public class Xsl2Xml extends JFrame {
 
 	private static final long serialVersionUID = 737038282745995221L;
 
-	private static final String propsName = "SEPA_config.cfg";
-	private static final String p_credName = "credName";
-	private static final String p_credID = "credId";
-	private static final String p_credIBAN = "credIBAN";
-	private static final String p_credBIC = "credBIC";
-	private static final String p_execDate = "execDate";
-	private static final String p_excelSheet = "excelSheet";
-
-	private static final String tfl_credName = "Gläubiger:";
-	private static final String tfl_credID = "Gläubiger-ID:";
-	private static final String tfl_credIBAN = "Gläubiger-IBAN:";
-	private static final String tfl_credBIC = "Gläubiger-BIC:";
-	private static final String tfl_execDate = "Datum der Ausführung:";
-	private static final String tfl_excelSheet = "Excel Sheet Nr.:";
-
-	private JButton open = new JButton("XLS-Datei öffnen...");
-	private JButton save = new JButton("XML-Datei speichern unter...");
+	private JButton button_open = new JButton("XLS-Datei öffnen...");
+	private JButton button_save = new JButton("XML-Datei speichern unter...");
 
 	private JTextField tf_credName;
 	private JTextField tf_credID;
@@ -59,7 +53,7 @@ public class Xsl2Xml extends JFrame {
 
 	private GridBagConstraints gbc;
 
-	private XMLCreator xmlc;
+	private ArrayList<Person> persons;
 
 	public Xsl2Xml() {
 		loadProps();
@@ -67,7 +61,7 @@ public class Xsl2Xml extends JFrame {
 	}
 
 	class OpenXLSListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
+		public final void actionPerformed(ActionEvent e) {
 			saveProps();
 			JFileChooser c = new JFileChooser();
 			File f = new File(System.getProperty("java.class.path"));
@@ -97,25 +91,31 @@ public class Xsl2Xml extends JFrame {
 				c.addChoosableFileFilter(xlsff);
 				c.setFileFilter(xlsff);
 				int rVal = c.showOpenDialog(Xsl2Xml.this);
+				Reader reader = null;
 				if (rVal == JFileChooser.APPROVE_OPTION) {
-					if (xmlc == null) {
+					if (reader == null) {
 						try {
-							xmlc = new XMLCreator(props);
+							reader = new XLSReader();
 						} catch (IOException e1) {
 							e1.printStackTrace();
-							JOptionPane.showMessageDialog(c,
-									"Ein Fehler beim Einlesen der Zuordnungskonfiguration ist aufgetreten.", "Fehler",
-									JOptionPane.ERROR_MESSAGE);
+							JOptionPane
+									.showMessageDialog(
+											c,
+											"Ein Fehler beim Einlesen der Zuordnungskonfiguration ist aufgetreten.",
+											"Fehler", JOptionPane.ERROR_MESSAGE);
 						}
 					}
 					try {
-						int excelSheetInt = Integer.parseInt(props.getProperty(p_excelSheet));
-						int count = xmlc.readExcel(c.getSelectedFile(), excelSheetInt);
-						if (count > 0) {
-							save.setEnabled(true);
-							JOptionPane.showMessageDialog(c,
-									"Anzahl eingelesene Einträge: " + count,
-									"XLS eingelesen",
+						int excelSheetInt = Integer.parseInt(props
+								.getProperty(Strings.P_EXCEL_SHEET.toString()));
+						reader.setSheet(excelSheetInt);
+						persons = reader.read(c.getSelectedFile());
+						if (persons.size() > 0) {
+							button_save.setEnabled(true);
+							JOptionPane.showMessageDialog(
+									c,
+									"Anzahl eingelesene Einträge: "
+											+ persons.size(), "XLS eingelesen",
 									JOptionPane.INFORMATION_MESSAGE);
 						} else {
 							JOptionPane.showMessageDialog(c,
@@ -124,9 +124,11 @@ public class Xsl2Xml extends JFrame {
 						}
 					} catch (Exception e1) {
 						e1.printStackTrace();
-						JOptionPane.showMessageDialog(c,
-								"Ein Fehler beim Lesen der Excel-Date ist aufgetreten.", "Fehler",
-								JOptionPane.ERROR_MESSAGE);
+						JOptionPane
+								.showMessageDialog(
+										c,
+										"Ein Fehler beim Lesen der Excel-Date ist aufgetreten.",
+										"Fehler", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
@@ -134,7 +136,7 @@ public class Xsl2Xml extends JFrame {
 	}
 
 	class SaveXMLListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
+		public final void actionPerformed(ActionEvent e) {
 			saveProps();
 			JFileChooser c = new JFileChooser();
 			File f = new File(System.getProperty("java.class.path"));
@@ -162,9 +164,10 @@ public class Xsl2Xml extends JFrame {
 			} else {
 				int rVal = c.showSaveDialog(Xsl2Xml.this);
 				if (rVal == JFileChooser.APPROVE_OPTION) {
-					xmlc.setProps(props);
+					Writer writer;
 					try {
-						xmlc.writeXML(c.getSelectedFile());
+						writer = new XMLWriter(props);
+						writer.write(c.getSelectedFile(), persons);
 						JOptionPane.showMessageDialog(c,
 								"XML-Datei erfolgreich geschrieben",
 								"XML geschrieben",
@@ -186,66 +189,66 @@ public class Xsl2Xml extends JFrame {
 	class MainWindowListener implements WindowListener {
 
 		@Override
-		public void windowActivated(WindowEvent arg0) {
+		public final void windowActivated(WindowEvent arg0) {
 			// Do nothing
 		}
 
 		@Override
-		public void windowClosed(WindowEvent arg0) {
+		public final void windowClosed(WindowEvent arg0) {
 			// Do nothing
 		}
 
 		@Override
-		public void windowClosing(WindowEvent arg0) {
+		public final void windowClosing(WindowEvent arg0) {
 			saveProps();
 			System.exit(0);
 		}
 
 		@Override
-		public void windowDeactivated(WindowEvent arg0) {
+		public final void windowDeactivated(WindowEvent arg0) {
 			// Do nothing
 		}
 
 		@Override
-		public void windowDeiconified(WindowEvent arg0) {
+		public final void windowDeiconified(WindowEvent arg0) {
 			// Do nothing
 		}
 
 		@Override
-		public void windowIconified(WindowEvent arg0) {
+		public final void windowIconified(WindowEvent arg0) {
 			// Do nothing
 		}
 
 		@Override
-		public void windowOpened(WindowEvent arg0) {
+		public final void windowOpened(WindowEvent arg0) {
 			// Do nothing
 		}
 
 	}
 
-	public static void main(String[] args) {
+	public static final void main(String[] args) {
 		run(new Xsl2Xml(), 400, 220);
 	}
 
-	public static void run(JFrame frame, int width, int height) {
+	public static final void run(JFrame frame, int width, int height) {
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setSize(width, height);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
 
-	private void loadProps() {
+	private final void loadProps() {
 		if (props == null) {
 			props = new Properties();
 		}
 		InputStream in;
 		try {
-			File propsFile = new File(propsName);
+			File propsFile = new File(Strings.PROPS_NAME.toString());
 			if (propsFile.exists()) {
 				in = new FileInputStream(propsFile);
 			} else {
 				in = Xsl2Xml.class.getClassLoader().getResourceAsStream(
-						propsName);
+						Strings.PROPS_NAME.toString());
 			}
 			if (in != null) {
 				props.load(in);
@@ -255,7 +258,7 @@ public class Xsl2Xml extends JFrame {
 		}
 	}
 
-	private void saveProps() {
+	private final void saveProps() {
 		if (props == null) {
 			props = new Properties();
 		}
@@ -272,21 +275,21 @@ public class Xsl2Xml extends JFrame {
 			tf_execDate.setText(tf_execDate.getText().substring(0, 10));
 
 			// set all props
-			props.put(p_credName, tf_credName.getText());
-			props.put(p_credID, tf_credID.getText());
-			props.put(p_credIBAN, tf_credIBAN.getText());
-			props.put(p_credBIC, tf_credBIC.getText());
-			props.put(p_execDate, tf_execDate.getText());
-			props.put(p_excelSheet, tf_excelSheet.getText());
+			props.put(Strings.P_CRED_NAME.toString(), tf_credName.getText());
+			props.put(Strings.P_CRED_ID.toString(), tf_credID.getText());
+			props.put(Strings.P_CRED_IBAN.toString(), tf_credIBAN.getText());
+			props.put(Strings.P_CRED_BIC.toString(), tf_credBIC.getText());
+			props.put(Strings.P_EXEC_DATE.toString(), tf_execDate.getText());
+			props.put(Strings.P_EXCEL_SHEET.toString(), tf_excelSheet.getText());
 			// save properties to project root folder
-			props.store(new FileOutputStream(propsName), null);
+			props.store(new FileOutputStream(Strings.PROPS_NAME.toString()), null);
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 	}
 
-	private void createGui() {
+	private final void createGui() {
 		this.setTitle("XLS SEPA Converter");
 
 		this.addWindowListener(new MainWindowListener());
@@ -300,49 +303,51 @@ public class Xsl2Xml extends JFrame {
 		p1.setLayout(new GridBagLayout());
 
 		// credName
-		addLabel(tfl_credName, p1, 0, 0);
+		addLabel(Strings.TFL_CRED_NAME.toString(), p1, 0, 0);
 		addTextField(tf_credName = new JTextField(
-				props.getProperty(p_credName), 20), p1, 1, 0);
+				props.getProperty(Strings.P_CRED_NAME.toString()), 20), p1, 1, 0);
 
 		// credID
-		addLabel(tfl_credID, p1, 0, 1);
+		addLabel(Strings.TFL_CRED_ID.toString(), p1, 0, 1);
 		addTextField(
-				tf_credID = new JTextField(props.getProperty(p_credID), 20),
+				tf_credID = new JTextField(props.getProperty(Strings.P_CRED_ID.toString()), 20),
 				p1, 1, 1);
 
 		// credIBAN
-		addLabel(tfl_credIBAN, p1, 0, 2);
+		addLabel(Strings.TFL_CRED_IBAN.toString(), p1, 0, 2);
 		addTextField(tf_credIBAN = new JTextField(
-				props.getProperty(p_credIBAN), 20), p1, 1, 2);
+				props.getProperty(Strings.P_CRED_IBAN.toString()), 20), p1, 1, 2);
 
 		// credBIC
-		addLabel(tfl_credBIC, p1, 0, 3);
-		addTextField(tf_credBIC = new JTextField(props.getProperty(p_credBIC),
+		addLabel(Strings.TFL_CRED_BIC.toString(), p1, 0, 3);
+		addTextField(tf_credBIC = new JTextField(props.getProperty(Strings.P_CRED_BIC.toString()),
 				20), p1, 1, 3);
 
 		// execDate
-		addLabel(tfl_execDate, p1, 0, 4);
+		addLabel(Strings.TFL_EXEC_DATE.toString(), p1, 0, 4);
 		addTextField(tf_execDate = new JTextField(
-				props.getProperty(p_execDate), 20), p1, 1, 4);
-		
+				props.getProperty(Strings.P_EXEC_DATE.toString()), 20), p1, 1, 4);
+
 		// excelSheet
-		addLabel(tfl_excelSheet, p1, 0, 5);
-		addTextField(tf_excelSheet = new JTextField(props.getProperty(p_excelSheet)), p1, 1, 5);
+		addLabel(Strings.TFL_EXCEL_SHEET.toString(), p1, 0, 5);
+		addTextField(
+				tf_excelSheet = new JTextField(props.getProperty(Strings.P_EXCEL_SHEET.toString())),
+				p1, 1, 5);
 
 		// ButtonPannel
 		// Buttons
 		JPanel p2 = new JPanel();
 		p2.setLayout(new GridBagLayout());
 		// Open-Button
-		open.addActionListener(new OpenXLSListener());
+		button_open.addActionListener(new OpenXLSListener());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		p2.add(open, gbc);
+		p2.add(button_open, gbc);
 		// Save-Button
-		save.addActionListener(new SaveXMLListener());
-		save.setEnabled(false);
+		button_save.addActionListener(new SaveXMLListener());
+		button_save.setEnabled(false);
 		gbc.gridy = 1;
-		p2.add(save, gbc);
+		p2.add(button_save, gbc);
 
 		// Assemble
 		gbc.gridx = 0;
@@ -356,7 +361,7 @@ public class Xsl2Xml extends JFrame {
 		c.add(mainP);
 	}
 
-	private void addLabel(String name, Container c, int gridx, int gridy) {
+	private final void addLabel(String name, Container c, int gridx, int gridy) {
 		JLabel label = new JLabel(name, SwingConstants.LEFT);
 		gbc.gridx = gridx;
 		gbc.gridy = gridy;
@@ -365,7 +370,7 @@ public class Xsl2Xml extends JFrame {
 		c.add(label, gbc);
 	}
 
-	private void addTextField(JTextField tf, Container c, int gridx, int gridy) {
+	private final void addTextField(JTextField tf, Container c, int gridx, int gridy) {
 		gbc.gridx = gridx;
 		gbc.gridy = gridy;
 		gbc.weightx = 0.5;
@@ -373,8 +378,8 @@ public class Xsl2Xml extends JFrame {
 		c.add(tf, gbc);
 	}
 
-	private boolean wrongDate() {
-		String datum = props.getProperty(p_execDate);
+	private final boolean wrongDate() {
+		String datum = props.getProperty(Strings.P_EXEC_DATE.toString());
 		SimpleDateFormat sdfToDate = new SimpleDateFormat("yyyy-MM-dd");
 		try {
 			Date execDate = sdfToDate.parse(datum);
@@ -388,8 +393,8 @@ public class Xsl2Xml extends JFrame {
 		return false;
 	}
 
-	private boolean notInt() {
-		String excelSheet = props.getProperty(p_excelSheet);
+	private final boolean notInt() {
+		String excelSheet = props.getProperty(Strings.P_EXCEL_SHEET.toString());
 		return !excelSheet.matches("[0-9]+");
 	}
 }
