@@ -1,10 +1,10 @@
 package de.dlrg_rodenkirchen.sepa;
 
-public class Mitglied {
-	String mitgliedsNr;
+public class Person {
+	String number;
 	String name;
 	String vorname;
-	String eintritt;
+	String unterschrieben;
 	String iban;
 	String bic;
 	String kontoinhaber;
@@ -12,13 +12,13 @@ public class Mitglied {
 	String betrag;
 	String zweck;
 
-	public Mitglied(String nr, String name, String vorname, String eiritt,
+	public Person(String nr, String name, String vorname, String unterschrieben,
 			String iban, String bic, String inhaber, String mandatsref,
 			String betrag, String zweck) {
-		this.mitgliedsNr = nr;
+		this.number = nr;
 		this.name = name;
 		this.vorname = vorname;
-		this.eintritt = eiritt;
+		this.unterschrieben = unterschrieben;
 		this.iban = iban;
 		this.bic = bic;
 		this.kontoinhaber = inhaber;

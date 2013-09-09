@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
 
 public class XMLCreator {
 
-	private ArrayList<Mitglied> mitglieder;
+	private ArrayList<Person> mitglieder;
 
 	private static final String p_credName = "credName";
 	private static final String p_credID = "credId";
@@ -60,7 +60,7 @@ public class XMLCreator {
 
 	public int readExcel(File xlsFile, int excelSheet) throws BiffException,
 			IOException, NumberFormatException, ParseException {
-		mitglieder = new ArrayList<Mitglied>();
+		mitglieder = new ArrayList<Person>();
 		File inputWorkbook = xlsFile;
 		Workbook w = Workbook.getWorkbook(inputWorkbook);
 		Sheet sheet = w.getSheet(excelSheet);
@@ -114,7 +114,7 @@ public class XMLCreator {
 					.getCell(Integer.parseInt(zuordnung
 							.getProperty(z_verwendungszweck)), i);
 			String zweck = cell.getContents();
-			Mitglied tmp = new Mitglied(nr, name, vorname, eintritt, iban, bic,
+			Person tmp = new Person(nr, name, vorname, eintritt, iban, bic,
 					inhaber, mandatsref, betrag, zweck);
 			mitglieder.add(tmp);
 		}
@@ -147,7 +147,7 @@ public class XMLCreator {
 		appendCdtr(pmtInf, doc);
 
 		Element dbtr;
-		for (Mitglied m : mitglieder) {
+		for (Person m : mitglieder) {
 			dbtr = createDbtr(m, doc);
 			pmtInf.appendChild(dbtr);
 		}
@@ -221,7 +221,7 @@ public class XMLCreator {
 		double sum = 0.0;
 		NumberFormat format = NumberFormat.getInstance(Locale.GERMAN);
 		Number number;
-		for (Mitglied mitglied : mitglieder) {
+		for (Person mitglied : mitglieder) {
 			number = format.parse(mitglied.betrag);
 			sum += number.doubleValue();
 		}
@@ -335,7 +335,7 @@ public class XMLCreator {
 		pmtInf.appendChild(cdtrSchmeId);
 	}
 
-	private Element createDbtr(Mitglied m, Document doc) throws Exception {
+	private Element createDbtr(Person m, Document doc) throws Exception {
 		Element drctDbtTxInf = doc.createElement("DrctDbtTxInf");
 
 		SimpleDateFormat sdf = new SimpleDateFormat();
@@ -345,7 +345,7 @@ public class XMLCreator {
 		Element endToEndId = doc.createElement("EndToEndId");
 		sdf.applyPattern("yyyyMMddHHmmss");
 		endToEndId.appendChild(doc.createTextNode("EToE"
-				+ sdf.format(new Date()) + "-" + m.mitgliedsNr));
+				+ sdf.format(new Date()) + "-" + m.number));
 		pmtId.appendChild(endToEndId);
 		drctDbtTxInf.appendChild(pmtId);
 
@@ -368,7 +368,7 @@ public class XMLCreator {
 		mndtId.appendChild(doc.createTextNode(m.mandatsref));
 		mndtRltdInf.appendChild(mndtId);
 		Element dtOfSgntr = doc.createElement("DtOfSgntr");
-		dtOfSgntr.appendChild(doc.createTextNode(m.eintritt));
+		dtOfSgntr.appendChild(doc.createTextNode(m.unterschrieben));
 		mndtRltdInf.appendChild(dtOfSgntr);
 		Element amdmntInd = doc.createElement("AmdmntInd");
 		amdmntInd.appendChild(doc.createTextNode("false"));
