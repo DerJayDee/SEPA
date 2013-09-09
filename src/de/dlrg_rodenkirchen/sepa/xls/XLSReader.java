@@ -21,31 +21,37 @@ import de.dlrg_rodenkirchen.sepa.interfaces.Reader;
 
 public class XLSReader implements Reader {
 
+	private Workbook w;
+	private boolean fileIsNotSet;
+
 	private int sheetNr;
 	private boolean sheetIsNotSet;
 
 	private Properties zuordnung;
 
-	public XLSReader() throws IOException {
+	public XLSReader(File f, int sheetNr) throws IOException, BiffException{
 		loadProps();
-		sheetIsNotSet = true;
-	}
-
-	public XLSReader(int sheetNr) throws IOException {
-		loadProps();
+		setFile(f);
 		setSheet(sheetNr);
 	}
+	
+	public XLSReader(File f) throws BiffException, IOException{
+		this(f, -1);
+	}
+	
+	public XLSReader() throws BiffException, IOException{
+		this(null, -1);
+	}
+	
 
 	@Override
-	public final ArrayList<Person> read(File file) throws ParseException,
-			NumberFormatException, BiffException, IndexOutOfBoundsException,
-			IOException {
-		ArrayList<Person> persons = new ArrayList<Person>();
-		File inputWorkbook = file;
-		Workbook w = Workbook.getWorkbook(inputWorkbook);
-		if (sheetIsNotSet) {
-			return persons;
+	public ArrayList<Person> read() throws ParseException,
+			NumberFormatException, IndexOutOfBoundsException,
+			IllegalStateException {
+		if (fileIsNotSet || sheetIsNotSet) {
+			throw new IllegalStateException();
 		}
+		ArrayList<Person> persons = new ArrayList<Person>();
 		Sheet sheet = w.getSheet(sheetNr);
 		for (int i = 1; i < sheet.getRows(); i++) {
 			// Mitgliedsnummer
@@ -103,9 +109,23 @@ public class XLSReader implements Reader {
 	}
 
 	@Override
+	public void setFile(File file) throws IOException, BiffException {
+		if (file != null) {
+			w = Workbook.getWorkbook(file);
+			fileIsNotSet = false;
+		} else {
+			fileIsNotSet = true;
+		}
+	}
+
+	@Override
 	public final void setSheet(int sheetNr) {
-		this.sheetNr = sheetNr;
-		this.sheetIsNotSet = false;
+		if (sheetNr >= 0) {
+			this.sheetNr = sheetNr;
+			this.sheetIsNotSet = false;
+		} else {
+			sheetIsNotSet = true;
+		}
 	}
 
 	@SuppressWarnings("resource")

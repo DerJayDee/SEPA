@@ -10,7 +10,6 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,6 +32,8 @@ import de.dlrg_rodenkirchen.sepa.interfaces.Reader;
 import de.dlrg_rodenkirchen.sepa.interfaces.Writer;
 import de.dlrg_rodenkirchen.sepa.xls.XLSFilter;
 import de.dlrg_rodenkirchen.sepa.xls.XLSReader;
+import de.dlrg_rodenkirchen.sepa.xlsx.XLSXFilter;
+import de.dlrg_rodenkirchen.sepa.xlsx.XLSXReader;
 import de.dlrg_rodenkirchen.sepa.xml.XMLWriter;
 
 public class Xsl2Xml extends JFrame {
@@ -87,16 +88,24 @@ public class Xsl2Xml extends JFrame {
 						"Die Nummer des Excel Sheets muss eine Zahl sein.",
 						"Ungültiges Excel Sheet", JOptionPane.ERROR_MESSAGE);
 			} else {
-				FileFilter xlsff = new XLSFilter();
-				c.addChoosableFileFilter(xlsff);
-				c.setFileFilter(xlsff);
+				FileFilter ff = new XLSXFilter();
+				c.addChoosableFileFilter(ff);
+				c.setFileFilter(ff);
+				ff = new XLSFilter();
+				c.addChoosableFileFilter(ff);
 				int rVal = c.showOpenDialog(Xsl2Xml.this);
 				Reader reader = null;
 				if (rVal == JFileChooser.APPROVE_OPTION) {
 					if (reader == null) {
 						try {
-							reader = new XLSReader();
-						} catch (IOException e1) {
+							String filename = c.getSelectedFile().getName();
+							if (filename.endsWith("xls")) {
+								reader = new XLSReader();
+							} else if (filename.endsWith("xlsx")) {
+								reader = new XLSXReader();
+							}
+
+						} catch (Exception e1) {
 							e1.printStackTrace();
 							JOptionPane
 									.showMessageDialog(
@@ -106,10 +115,20 @@ public class Xsl2Xml extends JFrame {
 						}
 					}
 					try {
+						reader.setFile(c.getSelectedFile());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+						JOptionPane
+								.showMessageDialog(
+										c,
+										"Ein Fehler ist beim Einlesen der Excel-Date ist aufgetreten.",
+										"Fehler", JOptionPane.ERROR_MESSAGE);
+					}
+					try {
 						int excelSheetInt = Integer.parseInt(props
 								.getProperty(Strings.P_EXCEL_SHEET.toString()));
 						reader.setSheet(excelSheetInt);
-						persons = reader.read(c.getSelectedFile());
+						persons = reader.read();
 						if (persons.size() > 0) {
 							button_save.setEnabled(true);
 							JOptionPane.showMessageDialog(
@@ -127,7 +146,7 @@ public class Xsl2Xml extends JFrame {
 						JOptionPane
 								.showMessageDialog(
 										c,
-										"Ein Fehler beim Lesen der Excel-Date ist aufgetreten.",
+										"Ein Fehler ist beim Parsen der Excel-Date ist aufgetreten.",
 										"Fehler", JOptionPane.ERROR_MESSAGE);
 					}
 				}
@@ -282,7 +301,8 @@ public class Xsl2Xml extends JFrame {
 			props.put(Strings.P_EXEC_DATE.toString(), tf_execDate.getText());
 			props.put(Strings.P_EXCEL_SHEET.toString(), tf_excelSheet.getText());
 			// save properties to project root folder
-			props.store(new FileOutputStream(Strings.PROPS_NAME.toString()), null);
+			props.store(new FileOutputStream(Strings.PROPS_NAME.toString()),
+					null);
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -304,34 +324,43 @@ public class Xsl2Xml extends JFrame {
 
 		// credName
 		addLabel(Strings.TFL_CRED_NAME.toString(), p1, 0, 0);
-		addTextField(tf_credName = new JTextField(
-				props.getProperty(Strings.P_CRED_NAME.toString()), 20), p1, 1, 0);
+		addTextField(
+				tf_credName = new JTextField(
+						props.getProperty(Strings.P_CRED_NAME.toString()), 20),
+				p1, 1, 0);
 
 		// credID
 		addLabel(Strings.TFL_CRED_ID.toString(), p1, 0, 1);
 		addTextField(
-				tf_credID = new JTextField(props.getProperty(Strings.P_CRED_ID.toString()), 20),
-				p1, 1, 1);
+				tf_credID = new JTextField(props.getProperty(Strings.P_CRED_ID
+						.toString()), 20), p1, 1, 1);
 
 		// credIBAN
 		addLabel(Strings.TFL_CRED_IBAN.toString(), p1, 0, 2);
-		addTextField(tf_credIBAN = new JTextField(
-				props.getProperty(Strings.P_CRED_IBAN.toString()), 20), p1, 1, 2);
+		addTextField(
+				tf_credIBAN = new JTextField(
+						props.getProperty(Strings.P_CRED_IBAN.toString()), 20),
+				p1, 1, 2);
 
 		// credBIC
 		addLabel(Strings.TFL_CRED_BIC.toString(), p1, 0, 3);
-		addTextField(tf_credBIC = new JTextField(props.getProperty(Strings.P_CRED_BIC.toString()),
-				20), p1, 1, 3);
+		addTextField(
+				tf_credBIC = new JTextField(
+						props.getProperty(Strings.P_CRED_BIC.toString()), 20),
+				p1, 1, 3);
 
 		// execDate
 		addLabel(Strings.TFL_EXEC_DATE.toString(), p1, 0, 4);
-		addTextField(tf_execDate = new JTextField(
-				props.getProperty(Strings.P_EXEC_DATE.toString()), 20), p1, 1, 4);
+		addTextField(
+				tf_execDate = new JTextField(
+						props.getProperty(Strings.P_EXEC_DATE.toString()), 20),
+				p1, 1, 4);
 
 		// excelSheet
 		addLabel(Strings.TFL_EXCEL_SHEET.toString(), p1, 0, 5);
 		addTextField(
-				tf_excelSheet = new JTextField(props.getProperty(Strings.P_EXCEL_SHEET.toString())),
+				tf_excelSheet = new JTextField(
+						props.getProperty(Strings.P_EXCEL_SHEET.toString())),
 				p1, 1, 5);
 
 		// ButtonPannel
@@ -370,7 +399,8 @@ public class Xsl2Xml extends JFrame {
 		c.add(label, gbc);
 	}
 
-	private final void addTextField(JTextField tf, Container c, int gridx, int gridy) {
+	private final void addTextField(JTextField tf, Container c, int gridx,
+			int gridy) {
 		gbc.gridx = gridx;
 		gbc.gridy = gridy;
 		gbc.weightx = 0.5;

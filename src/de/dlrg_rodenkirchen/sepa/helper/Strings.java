@@ -37,7 +37,7 @@ public enum Strings {
 		stringValue = s;
 	}
 
-	public String toString() {
+	public final String toString() {
 		return stringValue;
 	}
 
