@@ -5,6 +5,6 @@ import java.util.ArrayList;
 
 import de.dlrg_rodenkirchen.sepa.helper.Person;
 
-public interface Writer {
+public interface IWriter {
 	public void write(File file, ArrayList<Person> persons) throws Exception;
 }

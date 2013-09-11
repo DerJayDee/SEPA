@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import jxl.read.biff.BiffException;
 import de.dlrg_rodenkirchen.sepa.helper.Person;
 
-public interface Reader {
+public interface IReader {
 
 	public ArrayList<Person> read() throws ParseException,
 			NumberFormatException, IndexOutOfBoundsException;

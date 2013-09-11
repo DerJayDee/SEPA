@@ -20,12 +20,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import de.dlrg_rodenkirchen.sepa.helper.Person;
-import de.dlrg_rodenkirchen.sepa.helper.Strings;
-import de.dlrg_rodenkirchen.sepa.interfaces.Writer;
+import de.dlrg_rodenkirchen.sepa.helper.Writer;
 
-public class XMLWriter implements Writer {
-
-	private Properties props;
+public class XMLWriter extends Writer {
 
 	public XMLWriter(Properties props) throws IOException {
 		this.props = props;
@@ -74,9 +71,7 @@ public class XMLWriter implements Writer {
 		transformer.transform(source, result);
 	}
 
-	public final void setProps(Properties props) {
-		this.props = props;
-	}
+	
 
 	private final Element createDocumentElem(Document doc) {
 		Element root = doc.createElement("Document");
@@ -122,7 +117,7 @@ public class XMLWriter implements Writer {
 		// InitgPty
 		Element initgPty = doc.createElement("InitgPty");
 		Element nm = doc.createElement("Nm");
-		nm.appendChild(doc.createTextNode(props.getProperty(Strings.P_CRED_NAME.toString())));
+		nm.appendChild(doc.createTextNode(props.getProperty(P_CRED_NAME)));
 		initgPty.appendChild(nm);
 		header.appendChild(initgPty);
 
@@ -195,7 +190,7 @@ public class XMLWriter implements Writer {
 		// ReqdColltnDt
 		Element reqdColltnDt = doc.createElement("ReqdColltnDt");
 		reqdColltnDt.appendChild(doc.createTextNode(props
-				.getProperty(Strings.P_EXEC_DATE.toString())));
+				.getProperty(P_EXEC_DATE)));
 		pmtInf.appendChild(reqdColltnDt);
 	}
 
@@ -203,7 +198,7 @@ public class XMLWriter implements Writer {
 		// Cdtr
 		Element cdtr = doc.createElement("Cdtr");
 		Element nm = doc.createElement("Nm");
-		nm.appendChild(doc.createTextNode(props.getProperty(Strings.P_CRED_NAME.toString())));
+		nm.appendChild(doc.createTextNode(props.getProperty(P_CRED_NAME)));
 		cdtr.appendChild(nm);
 		pmtInf.appendChild(cdtr);
 
@@ -211,7 +206,7 @@ public class XMLWriter implements Writer {
 		Element cdtrAcct = doc.createElement("CdtrAcct");
 		Element id1 = doc.createElement("Id");
 		Element iban = doc.createElement("IBAN");
-		iban.appendChild(doc.createTextNode(props.getProperty(Strings.P_CRED_IBAN.toString())));
+		iban.appendChild(doc.createTextNode(props.getProperty(P_CRED_IBAN)));
 		id1.appendChild(iban);
 		cdtrAcct.appendChild(id1);
 		pmtInf.appendChild(cdtrAcct);
@@ -220,7 +215,7 @@ public class XMLWriter implements Writer {
 		Element cdtrAgt = doc.createElement("CdtrAgt");
 		Element finInstnId = doc.createElement("FinInstnId");
 		Element bic = doc.createElement("BIC");
-		bic.appendChild(doc.createTextNode(props.getProperty(Strings.P_CRED_BIC.toString())));
+		bic.appendChild(doc.createTextNode(props.getProperty(P_CRED_BIC)));
 		finInstnId.appendChild(bic);
 		cdtrAgt.appendChild(finInstnId);
 		pmtInf.appendChild(cdtrAgt);
@@ -236,7 +231,7 @@ public class XMLWriter implements Writer {
 		Element prvtId = doc.createElement("PrvtId");
 		Element othr = doc.createElement("Othr");
 		Element id3 = doc.createElement("Id");
-		id3.appendChild(doc.createTextNode(props.getProperty(Strings.P_CRED_ID.toString())));
+		id3.appendChild(doc.createTextNode(props.getProperty(P_CRED_ID)));
 		Element schmeNm = doc.createElement("SchmeNm");
 		Element prtry = doc.createElement("Prtry");
 		prtry.appendChild(doc.createTextNode("SEPA"));
@@ -259,7 +254,7 @@ public class XMLWriter implements Writer {
 		Element endToEndId = doc.createElement("EndToEndId");
 		sdf.applyPattern("yyyyMMddHHmmss");
 		endToEndId.appendChild(doc.createTextNode("EToE"
-				+ sdf.format(new Date()) + "-" + p.getNumber()));
+				+ sdf.format(new Date()) + "-" + p.getId()));
 		pmtId.appendChild(endToEndId);
 		drctDbtTxInf.appendChild(pmtId);
 
@@ -282,7 +277,7 @@ public class XMLWriter implements Writer {
 		mndtId.appendChild(doc.createTextNode(p.getMandatsref()));
 		mndtRltdInf.appendChild(mndtId);
 		Element dtOfSgntr = doc.createElement("DtOfSgntr");
-		dtOfSgntr.appendChild(doc.createTextNode(p.getUnterschrieben()));
+		dtOfSgntr.appendChild(doc.createTextNode(p.getSigned()));
 		mndtRltdInf.appendChild(dtOfSgntr);
 		Element amdmntInd = doc.createElement("AmdmntInd");
 		amdmntInd.appendChild(doc.createTextNode("false"));

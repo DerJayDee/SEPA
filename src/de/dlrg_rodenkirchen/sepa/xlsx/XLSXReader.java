@@ -8,7 +8,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Properties;
+
+import jxl.read.biff.BiffException;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -16,36 +17,25 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import de.dlrg_rodenkirchen.sepa.Xsl2Xml;
 import de.dlrg_rodenkirchen.sepa.helper.Person;
-import de.dlrg_rodenkirchen.sepa.helper.Strings;
-import de.dlrg_rodenkirchen.sepa.interfaces.Reader;
+import de.dlrg_rodenkirchen.sepa.helper.Reader;
 
-public class XLSXReader implements Reader {
+public final class XLSXReader extends Reader {
 
 	private XSSFWorkbook w;
-	private boolean fileIsNotSet;
 
-	private int sheetNr;
-	private boolean sheetIsNotSet;
-
-	private Properties zuordnung;
-
-	public XLSXReader(File f, int sheetNr) throws IOException {
-		loadProps();
-		setFile(f);
-		setSheet(sheetNr);
+	public XLSXReader(File f, int sheetNr) throws IOException, BiffException {
+		super(f, sheetNr);
 	}
 
-	public XLSXReader(File f) throws IOException {
-		this(f, -1);
+	public XLSXReader(File f) throws IOException, BiffException {
+		super(f);
 	}
 
-	public XLSXReader() throws IOException {
-		this(null, -1);
+	public XLSXReader() throws IOException, BiffException {
+		super();
 	}
 
-	@Override
 	public final ArrayList<Person> read() throws ParseException,
 			NumberFormatException, IndexOutOfBoundsException,
 			IllegalStateException {
@@ -59,7 +49,7 @@ public class XLSXReader implements Reader {
 			if ((row = sheet.getRow(i)) != null) {
 				// Mitgliedsnummer
 				XSSFCell cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Strings.Z_NUMMER.toString())),
+						.getProperty(Z_NUMMER)),
 						Row.RETURN_BLANK_AS_NULL);
 				if (cell == null) {
 					break;
@@ -68,38 +58,38 @@ public class XLSXReader implements Reader {
 				nr = nr.substring(0, nr.length() - 2);
 				// Nachname
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Strings.Z_NACHNAME.toString())));
+						.getProperty(Z_NACHNAME)));
 				String name = cell.getStringCellValue();
 				// Vorname
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Strings.Z_VORNAME.toString())));
+						.getProperty(Z_VORNAME)));
 				String vorname = cell.getStringCellValue();
 				// Eintrittsdatum
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Strings.Z_EINTRITTSDATUM.toString())));
+						.getProperty(Z_EINTRITTSDATUM)));
 				Date eintritt_datum = cell.getDateCellValue();
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				sdf.applyPattern("yyyy-MM-dd");
 				String eintritt = sdf.format(eintritt_datum);
 				// IBAN
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Strings.Z_IBAN.toString())));
+						.getProperty(Z_IBAN)));
 				String iban = cell.getStringCellValue();
 				// BIC
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Strings.Z_BIC.toString())));
+						.getProperty(Z_BIC)));
 				String bic = cell.getStringCellValue();
 				// Inhaber
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Strings.Z_KONTOINHABER.toString())));
+						.getProperty(Z_KONTOINHABER)));
 				String inhaber = cell.getStringCellValue();
 				// Mandatsref
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Strings.Z_MANDATSREFERENZ.toString())));
+						.getProperty(Z_MANDATSREFERENZ)));
 				String mandatsref = cell.getStringCellValue();
 				// Betrag
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Strings.Z_BEITRAG.toString())));
+						.getProperty(Z_BEITRAG)));
 				String betrag = Double.toString(cell.getNumericCellValue());
 				while (betrag.split("\\.")[1].length() < 2) {
 					betrag += "0";
@@ -107,7 +97,7 @@ public class XLSXReader implements Reader {
 				betrag = betrag.replaceAll("\\.", ",");
 				// Zweck
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Strings.Z_VERWENDUNGSZWECK.toString())));
+						.getProperty(Z_VERWENDUNGSZWECK)));
 				String zweck = cell.getStringCellValue();
 				Person tmp = new Person(nr, name, vorname, eintritt, iban, bic,
 						inhaber, mandatsref, betrag, zweck);
@@ -117,8 +107,7 @@ public class XLSXReader implements Reader {
 		return persons;
 	}
 
-	@Override
-	public void setFile(File file) throws IOException {
+	public final void setFile(File file) throws IOException {
 		if (file != null) {
 			InputStream is = new FileInputStream(file);
 			w = new XSSFWorkbook(is);
@@ -127,32 +116,4 @@ public class XLSXReader implements Reader {
 			fileIsNotSet = true;
 		}
 	}
-
-	@Override
-	public final void setSheet(int sheetNr) {
-		if (sheetNr >= 0) {
-			this.sheetNr = sheetNr;
-			this.sheetIsNotSet = false;
-		} else {
-			sheetIsNotSet = true;
-		}
-	}
-
-	@SuppressWarnings("resource")
-	private final void loadProps() throws IOException {
-		if (zuordnung == null) {
-			zuordnung = new Properties();
-		}
-		InputStream in;
-		File propsFile = new File(Strings.ZUORDNUNGS_PROPS_NAME.toString());
-		if (propsFile.exists()) {
-			in = new FileInputStream(propsFile);
-		} else {
-			in = Xsl2Xml.class.getClassLoader().getResourceAsStream(
-					Strings.ZUORDNUNGS_PROPS_NAME.toString());
-		}
-		zuordnung.load(in);
-		in.close();
-	}
-
 }
