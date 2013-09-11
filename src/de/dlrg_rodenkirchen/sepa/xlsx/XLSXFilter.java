@@ -1,25 +1,16 @@
 package de.dlrg_rodenkirchen.sepa.xlsx;
 
-import java.io.File;
+import de.dlrg_rodenkirchen.sepa.helper.MyFileFilter;
 
-import javax.swing.filechooser.FileFilter;
+public final class XLSXFilter extends MyFileFilter {
+	private final static String XLSX = ".xlsx";
 
-public class XLSXFilter extends FileFilter {
-	public final static String XLSX = ".xlsx";
-
-	@Override
-	public boolean accept(File f) {
-		if (f.isDirectory()) {
-			return true;
-		}
-		if (f.getName().endsWith(XLSX)) {
-			return true;
-		}
-		return false;
+	public XLSXFilter() {
+		super(XLSX);
 	}
 
 	@Override
-	public String getDescription() {
-		return "XLSX-Dateien";
+	public final String getDescription() {
+		return texte.getString("FF_XLSX");
 	}
 }

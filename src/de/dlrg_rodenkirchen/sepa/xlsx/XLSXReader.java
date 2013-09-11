@@ -19,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import de.dlrg_rodenkirchen.sepa.helper.Person;
 import de.dlrg_rodenkirchen.sepa.helper.Reader;
+import de.dlrg_rodenkirchen.sepa.helper.StaticString;
 
 public final class XLSXReader extends Reader {
 
@@ -49,7 +50,7 @@ public final class XLSXReader extends Reader {
 			if ((row = sheet.getRow(i)) != null) {
 				// Mitgliedsnummer
 				XSSFCell cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Z_NUMMER)),
+						.getProperty(StaticString.Z_NUMMER)),
 						Row.RETURN_BLANK_AS_NULL);
 				if (cell == null) {
 					break;
@@ -58,38 +59,38 @@ public final class XLSXReader extends Reader {
 				nr = nr.substring(0, nr.length() - 2);
 				// Nachname
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Z_NACHNAME)));
+						.getProperty(StaticString.Z_NACHNAME)));
 				String name = cell.getStringCellValue();
 				// Vorname
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Z_VORNAME)));
+						.getProperty(StaticString.Z_VORNAME)));
 				String vorname = cell.getStringCellValue();
 				// Eintrittsdatum
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Z_EINTRITTSDATUM)));
+						.getProperty(StaticString.Z_EINTRITTSDATUM)));
 				Date eintritt_datum = cell.getDateCellValue();
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				sdf.applyPattern("yyyy-MM-dd");
 				String eintritt = sdf.format(eintritt_datum);
 				// IBAN
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Z_IBAN)));
+						.getProperty(StaticString.Z_IBAN)));
 				String iban = cell.getStringCellValue();
 				// BIC
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Z_BIC)));
+						.getProperty(StaticString.Z_BIC)));
 				String bic = cell.getStringCellValue();
 				// Inhaber
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Z_KONTOINHABER)));
+						.getProperty(StaticString.Z_KONTOINHABER)));
 				String inhaber = cell.getStringCellValue();
 				// Mandatsref
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Z_MANDATSREFERENZ)));
+						.getProperty(StaticString.Z_MANDATSREFERENZ)));
 				String mandatsref = cell.getStringCellValue();
 				// Betrag
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Z_BEITRAG)));
+						.getProperty(StaticString.Z_BEITRAG)));
 				String betrag = Double.toString(cell.getNumericCellValue());
 				while (betrag.split("\\.")[1].length() < 2) {
 					betrag += "0";
@@ -97,7 +98,7 @@ public final class XLSXReader extends Reader {
 				betrag = betrag.replaceAll("\\.", ",");
 				// Zweck
 				cell = row.getCell(Integer.parseInt(zuordnung
-						.getProperty(Z_VERWENDUNGSZWECK)));
+						.getProperty(StaticString.Z_VERWENDUNGSZWECK)));
 				String zweck = cell.getStringCellValue();
 				Person tmp = new Person(nr, name, vorname, eintritt, iban, bic,
 						inhaber, mandatsref, betrag, zweck);

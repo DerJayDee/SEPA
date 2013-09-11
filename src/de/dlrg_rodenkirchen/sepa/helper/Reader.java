@@ -20,18 +20,6 @@ public abstract class Reader implements IReader {
 
 	protected Properties zuordnung;
 
-	protected static final String ZUORDNUNGS_PROPS_NAME = "SEPA_Zuordnung.cfg";
-	protected static final String Z_NUMMER = "mitgliedsnummer";
-	protected static final String Z_NACHNAME = "nachname";
-	protected static final String Z_VORNAME = "vorname";
-	protected static final String Z_EINTRITTSDATUM = "eintrittsdatum";
-	protected static final String Z_IBAN = "iban";
-	protected static final String Z_BIC = "bic";
-	protected static final String Z_KONTOINHABER = "kontoinhaber";
-	protected static final String Z_BEITRAG = "beitrag";
-	protected static final String Z_MANDATSREFERENZ = "mandatsreferenz";
-	protected static final String Z_VERWENDUNGSZWECK = "verwendungszweck";
-
 	public Reader(File f, int sheetNr) throws IOException, BiffException {
 		loadProps();
 		setFile(f);
@@ -60,21 +48,24 @@ public abstract class Reader implements IReader {
 		}
 	}
 
-	@SuppressWarnings("resource")
 	protected final void loadProps() throws IOException {
 		if (zuordnung == null) {
 			zuordnung = new Properties();
 		}
 		InputStream in;
-		File propsFile = new File(ZUORDNUNGS_PROPS_NAME);
+		File propsFile = new File(StaticString.ZUORDNUNGS_PROPS_NAME);
 		if (propsFile.exists()) {
 			in = new FileInputStream(propsFile);
+			zuordnung.load(in);
+			in.close();
 		} else {
 			in = ClassLoader.getSystemClassLoader().getResourceAsStream(
-					"de/dlrg_rodenkirchen/sepa/config/"+ZUORDNUNGS_PROPS_NAME);
+					StaticString.CONFIG_PATH
+							+ StaticString.ZUORDNUNGS_PROPS_NAME);
+			zuordnung.load(in);
+			in.close();
 		}
-		zuordnung.load(in);
-		in.close();
+
 	}
 
 }

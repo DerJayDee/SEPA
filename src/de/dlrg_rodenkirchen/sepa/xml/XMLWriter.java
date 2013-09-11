@@ -20,12 +20,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import de.dlrg_rodenkirchen.sepa.helper.Person;
+import de.dlrg_rodenkirchen.sepa.helper.StaticString;
 import de.dlrg_rodenkirchen.sepa.helper.Writer;
 
-public class XMLWriter extends Writer {
+public final class XMLWriter extends Writer {
 
 	public XMLWriter(Properties props) throws IOException {
-		this.props = props;
+		super(props);
 	}
 
 	public final void write(File xmlFile, ArrayList<Person> persons)
@@ -71,8 +72,6 @@ public class XMLWriter extends Writer {
 		transformer.transform(source, result);
 	}
 
-	
-
 	private final Element createDocumentElem(Document doc) {
 		Element root = doc.createElement("Document");
 		// Namespaces
@@ -117,7 +116,8 @@ public class XMLWriter extends Writer {
 		// InitgPty
 		Element initgPty = doc.createElement("InitgPty");
 		Element nm = doc.createElement("Nm");
-		nm.appendChild(doc.createTextNode(props.getProperty(P_CRED_NAME)));
+		nm.appendChild(doc.createTextNode(props
+				.getProperty(StaticString.P_CRED_NAME)));
 		initgPty.appendChild(nm);
 		header.appendChild(initgPty);
 
@@ -190,7 +190,7 @@ public class XMLWriter extends Writer {
 		// ReqdColltnDt
 		Element reqdColltnDt = doc.createElement("ReqdColltnDt");
 		reqdColltnDt.appendChild(doc.createTextNode(props
-				.getProperty(P_EXEC_DATE)));
+				.getProperty(StaticString.P_EXEC_DATE)));
 		pmtInf.appendChild(reqdColltnDt);
 	}
 
@@ -198,7 +198,8 @@ public class XMLWriter extends Writer {
 		// Cdtr
 		Element cdtr = doc.createElement("Cdtr");
 		Element nm = doc.createElement("Nm");
-		nm.appendChild(doc.createTextNode(props.getProperty(P_CRED_NAME)));
+		nm.appendChild(doc.createTextNode(props
+				.getProperty(StaticString.P_CRED_NAME)));
 		cdtr.appendChild(nm);
 		pmtInf.appendChild(cdtr);
 
@@ -206,7 +207,8 @@ public class XMLWriter extends Writer {
 		Element cdtrAcct = doc.createElement("CdtrAcct");
 		Element id1 = doc.createElement("Id");
 		Element iban = doc.createElement("IBAN");
-		iban.appendChild(doc.createTextNode(props.getProperty(P_CRED_IBAN)));
+		iban.appendChild(doc.createTextNode(props
+				.getProperty(StaticString.P_CRED_IBAN)));
 		id1.appendChild(iban);
 		cdtrAcct.appendChild(id1);
 		pmtInf.appendChild(cdtrAcct);
@@ -215,7 +217,8 @@ public class XMLWriter extends Writer {
 		Element cdtrAgt = doc.createElement("CdtrAgt");
 		Element finInstnId = doc.createElement("FinInstnId");
 		Element bic = doc.createElement("BIC");
-		bic.appendChild(doc.createTextNode(props.getProperty(P_CRED_BIC)));
+		bic.appendChild(doc.createTextNode(props
+				.getProperty(StaticString.P_CRED_BIC)));
 		finInstnId.appendChild(bic);
 		cdtrAgt.appendChild(finInstnId);
 		pmtInf.appendChild(cdtrAgt);
@@ -231,7 +234,8 @@ public class XMLWriter extends Writer {
 		Element prvtId = doc.createElement("PrvtId");
 		Element othr = doc.createElement("Othr");
 		Element id3 = doc.createElement("Id");
-		id3.appendChild(doc.createTextNode(props.getProperty(P_CRED_ID)));
+		id3.appendChild(doc.createTextNode(props
+				.getProperty(StaticString.P_CRED_ID)));
 		Element schmeNm = doc.createElement("SchmeNm");
 		Element prtry = doc.createElement("Prtry");
 		prtry.appendChild(doc.createTextNode("SEPA"));

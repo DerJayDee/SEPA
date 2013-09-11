@@ -1,6 +1,6 @@
 package de.dlrg_rodenkirchen.sepa.helper;
 
-public class Person {
+public final class Person {
 	String id;
 	String name;
 	String vorname;
@@ -12,13 +12,13 @@ public class Person {
 	String betrag;
 	String zweck;
 
-	public Person(String nr, String name, String vorname,
-			String unterschrieben, String iban, String bic, String inhaber,
-			String mandatsref, String betrag, String zweck) {
-		this.id = nr;
+	public Person(String id, String name, String vorname, String signed,
+			String iban, String bic, String inhaber, String mandatsref,
+			String betrag, String zweck) {
+		this.id = id;
 		this.name = name;
 		this.vorname = vorname;
-		this.signed = unterschrieben;
+		this.signed = signed;
 		this.iban = iban;
 		this.bic = bic;
 		this.kontoinhaber = inhaber;
