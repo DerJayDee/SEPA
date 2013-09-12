@@ -1,4 +1,4 @@
-package de.dlrg_rodenkirchen.sepa.xls;
+package de.dlrg_rodenkirchen.sepa.excel;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,29 +9,30 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import de.dlrg_rodenkirchen.sepa.helper.Person;
 import de.dlrg_rodenkirchen.sepa.helper.Reader;
 import de.dlrg_rodenkirchen.sepa.helper.StaticString;
 
-public final class XLSReader extends Reader {
+public final class ExcelReader extends Reader {
 
-	private HSSFWorkbook w;
+	private Workbook w;
 
-	public XLSReader(File f, int sheetNr) throws IOException {
+	public ExcelReader(File f, int sheetNr) throws IOException {
 		super(f, sheetNr);
 	}
 
-	public XLSReader(File f) throws IOException {
+	public ExcelReader(File f) throws IOException {
 		super(f);
 	}
 
-	public XLSReader() throws IOException {
+	public ExcelReader() throws IOException {
 		super();
 	}
 
@@ -42,12 +43,12 @@ public final class XLSReader extends Reader {
 			throw new IllegalStateException();
 		}
 		ArrayList<Person> persons = new ArrayList<Person>();
-		HSSFSheet sheet = w.getSheetAt(sheetNr);
+		Sheet sheet = w.getSheetAt(sheetNr);
 		for (int i = 1; i < sheet.getLastRowNum(); i++) {
-			HSSFRow row = null;
+			Row row = null;
 			if ((row = sheet.getRow(i)) != null) {
 				// Mitgliedsnummer
-				HSSFCell cell = row.getCell(Integer.parseInt(zuordnung
+				Cell cell = row.getCell(Integer.parseInt(zuordnung
 						.getProperty(StaticString.Z_NUMMER)),
 						Row.RETURN_BLANK_AS_NULL);
 				if (cell == null) {
@@ -109,8 +110,14 @@ public final class XLSReader extends Reader {
 	public final void setFile(File file) throws IOException {
 		if (file != null) {
 			InputStream is = new FileInputStream(file);
-			w = new HSSFWorkbook(is);
-			fileIsNotSet = false;
+			String filename = file.getName();
+			if (filename.endsWith("xls")) {
+				w = new HSSFWorkbook(is);
+				fileIsNotSet = false;
+			} else if (filename.endsWith("xlsx")) {
+				w = new XSSFWorkbook(is);
+				fileIsNotSet = false;
+			}
 		} else {
 			fileIsNotSet = true;
 		}
