@@ -11,9 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -29,15 +27,15 @@ import javax.swing.filechooser.FileFilter;
 
 import de.dlrg_rodenkirchen.sepa.excel.ExcelFilter;
 import de.dlrg_rodenkirchen.sepa.excel.ExcelReader;
+import de.dlrg_rodenkirchen.sepa.helper.Check;
 import de.dlrg_rodenkirchen.sepa.helper.Person;
 import de.dlrg_rodenkirchen.sepa.helper.StaticString;
 import de.dlrg_rodenkirchen.sepa.interfaces.IReader;
 import de.dlrg_rodenkirchen.sepa.interfaces.IWriter;
 import de.dlrg_rodenkirchen.sepa.xml.XMLWriter;
 
+@SuppressWarnings("serial")
 public final class Xsl2Xml extends JFrame {
-
-	private static final long serialVersionUID = 737038282745995221L;
 
 	private JButton button_open;
 	private JButton button_save;
@@ -63,33 +61,15 @@ public final class Xsl2Xml extends JFrame {
 		createGui();
 	}
 
-	class OpenXLSListener implements ActionListener {
+	class OpenExcelListener implements ActionListener {
 		public final void actionPerformed(ActionEvent e) {
 			saveProps();
 			JFileChooser c = new JFileChooser();
 			File f = new File(System.getProperty("java.class.path"));
 			File dir = f.getAbsoluteFile().getParentFile();
 			c.setCurrentDirectory(dir);
-			if (tf_credName.getText().equals("")
-					|| tf_credID.getText().equals("")
-					|| tf_credIBAN.getText().equals("")
-					|| tf_credBIC.getText().equals("")
-					|| tf_execDate.getText().equals("")
-					|| tf_excelSheet.getText().equals("")) {
-				JOptionPane.showMessageDialog(c,
-						texte.getString("D_MISSING_VALUES_TEXT"),
-						texte.getString("D_MISSING_VALUES"),
-						JOptionPane.ERROR_MESSAGE);
-			} else if (wrongDate()) {
-				JOptionPane.showMessageDialog(c,
-						texte.getString("D_ILLEGAL_DATE_TEXT"),
-						texte.getString("D_ILLEGAL_DATE"),
-						JOptionPane.ERROR_MESSAGE);
-			} else if (notInt()) {
-				JOptionPane.showMessageDialog(c,
-						texte.getString("D_INVALID_SHEET_TEXT"),
-						texte.getString("D_INVALID_SHEET"),
-						JOptionPane.ERROR_MESSAGE);
+			if (inputNotCorrect(c)) {
+				return;
 			} else {
 				FileFilter ff = new ExcelFilter();
 				c.addChoosableFileFilter(ff);
@@ -154,26 +134,8 @@ public final class Xsl2Xml extends JFrame {
 			File f = new File(System.getProperty("java.class.path"));
 			File dir = f.getAbsoluteFile().getParentFile();
 			c.setCurrentDirectory(dir);
-			if (tf_credName.getText().equals("")
-					|| tf_credID.getText().equals("")
-					|| tf_credIBAN.getText().equals("")
-					|| tf_credBIC.getText().equals("")
-					|| tf_execDate.getText().equals("")
-					|| tf_excelSheet.getText().equals("")) {
-				JOptionPane.showMessageDialog(c,
-						texte.getString("D_MISSING_VALUES_TEXT"),
-						texte.getString("D_MISSING_VALUES"),
-						JOptionPane.ERROR_MESSAGE);
-			} else if (wrongDate()) {
-				JOptionPane.showMessageDialog(c,
-						texte.getString("D_ILLEGAL_DATE_TEXT"),
-						texte.getString("D_ILLEGAL_DATE"),
-						JOptionPane.ERROR_MESSAGE);
-			} else if (notInt()) {
-				JOptionPane.showMessageDialog(c,
-						texte.getString("D_INVALID_SHEET_TEXT"),
-						texte.getString("D_INVALID_SHEET"),
-						JOptionPane.ERROR_MESSAGE);
+			if (inputNotCorrect(c)) {
+				return;
 			} else {
 				int rVal = c.showSaveDialog(Xsl2Xml.this);
 				if (rVal == JFileChooser.APPROVE_OPTION) {
@@ -370,7 +332,7 @@ public final class Xsl2Xml extends JFrame {
 		JPanel p2 = new JPanel();
 		p2.setLayout(new GridBagLayout());
 		// Open-Button
-		button_open.addActionListener(new OpenXLSListener());
+		button_open.addActionListener(new OpenExcelListener());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		p2.add(button_open, gbc);
@@ -410,23 +372,30 @@ public final class Xsl2Xml extends JFrame {
 		c.add(tf, gbc);
 	}
 
-	private final boolean wrongDate() {
-		String datum = props.getProperty(StaticString.P_EXEC_DATE);
-		SimpleDateFormat sdfToDate = new SimpleDateFormat("yyyy-MM-dd");
-		try {
-			Date execDate = sdfToDate.parse(datum);
-			Date now = new Date();
-			if (now.after(execDate)) {
-				return true;
-			}
-		} catch (Exception e1) {
+	private final boolean inputNotCorrect(JFileChooser c) {
+		if (tf_credName.getText().equals("") || tf_credID.getText().equals("")
+				|| tf_credIBAN.getText().equals("")
+				|| tf_credBIC.getText().equals("")
+				|| tf_execDate.getText().equals("")
+				|| tf_excelSheet.getText().equals("")) {
+			JOptionPane.showMessageDialog(c,
+					texte.getString("D_MISSING_VALUES_TEXT"),
+					texte.getString("D_MISSING_VALUES"),
+					JOptionPane.ERROR_MESSAGE);
+			return true;
+		} else if (Check.wrongDate(props.getProperty(StaticString.P_EXEC_DATE))) {
+			JOptionPane.showMessageDialog(c,
+					texte.getString("D_ILLEGAL_DATE_TEXT"),
+					texte.getString("D_ILLEGAL_DATE"),
+					JOptionPane.ERROR_MESSAGE);
+			return true;
+		} else if (Check.notInt(props.getProperty(StaticString.P_EXCEL_SHEET))) {
+			JOptionPane.showMessageDialog(c,
+					texte.getString("D_INVALID_SHEET_TEXT"),
+					texte.getString("D_INVALID_SHEET"),
+					JOptionPane.ERROR_MESSAGE);
 			return true;
 		}
 		return false;
-	}
-
-	private final boolean notInt() {
-		String excelSheet = props.getProperty(StaticString.P_EXCEL_SHEET);
-		return !excelSheet.matches("[0-9]+");
 	}
 }
