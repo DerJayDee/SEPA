@@ -27,14 +27,12 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 
+import de.dlrg_rodenkirchen.sepa.excel.ExcelFilter;
+import de.dlrg_rodenkirchen.sepa.excel.ExcelReader;
 import de.dlrg_rodenkirchen.sepa.helper.Person;
 import de.dlrg_rodenkirchen.sepa.helper.StaticString;
 import de.dlrg_rodenkirchen.sepa.interfaces.IReader;
 import de.dlrg_rodenkirchen.sepa.interfaces.IWriter;
-import de.dlrg_rodenkirchen.sepa.xls.XLSFilter;
-import de.dlrg_rodenkirchen.sepa.xls.XLSReader;
-import de.dlrg_rodenkirchen.sepa.xlsx.XLSXFilter;
-import de.dlrg_rodenkirchen.sepa.xlsx.XLSXReader;
 import de.dlrg_rodenkirchen.sepa.xml.XMLWriter;
 
 public final class Xsl2Xml extends JFrame {
@@ -93,23 +91,15 @@ public final class Xsl2Xml extends JFrame {
 						texte.getString("D_INVALID_SHEET"),
 						JOptionPane.ERROR_MESSAGE);
 			} else {
-				FileFilter ff = new XLSXFilter();
+				FileFilter ff = new ExcelFilter();
 				c.addChoosableFileFilter(ff);
 				c.setFileFilter(ff);
-				ff = new XLSFilter();
-				c.addChoosableFileFilter(ff);
 				int rVal = c.showOpenDialog(Xsl2Xml.this);
 				IReader reader = null;
 				if (rVal == JFileChooser.APPROVE_OPTION) {
 					if (reader == null) {
 						try {
-							String filename = c.getSelectedFile().getName();
-							if (filename.endsWith("xls")) {
-								reader = new XLSReader();
-							} else if (filename.endsWith("xlsx")) {
-								reader = new XLSXReader();
-							}
-
+							reader = new ExcelReader();
 						} catch (Exception e1) {
 							e1.printStackTrace();
 							JOptionPane.showMessageDialog(c,
@@ -196,11 +186,10 @@ public final class Xsl2Xml extends JFrame {
 								texte.getString("D_XML_WRITTEN"),
 								JOptionPane.INFORMATION_MESSAGE);
 					} catch (Exception e1) {
-						JOptionPane
-								.showMessageDialog(
-										c,
-										texte.getString("D_ERROR_WRITING_XML_TEXT"),
-										texte.getString("D_ERROR"), JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(c,
+								texte.getString("D_ERROR_WRITING_XML_TEXT"),
+								texte.getString("D_ERROR"),
+								JOptionPane.ERROR_MESSAGE);
 						e1.printStackTrace();
 					}
 				}
