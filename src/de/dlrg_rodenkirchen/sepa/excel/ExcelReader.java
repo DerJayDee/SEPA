@@ -54,8 +54,8 @@ public final class ExcelReader extends Reader {
 				if (cell == null) {
 					break;
 				}
-				String nr = Double.toString(cell.getNumericCellValue());
-				nr = nr.substring(0, nr.length() - 2);
+				String id = Double.toString(cell.getNumericCellValue());
+				id = id.substring(0, id.length() - 2);
 				// Nachname
 				cell = row.getCell(Integer.parseInt(zuordnung
 						.getProperty(StaticString.Z_NACHNAME)));
@@ -70,7 +70,7 @@ public final class ExcelReader extends Reader {
 				Date eintritt_datum = cell.getDateCellValue();
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				sdf.applyPattern("yyyy-MM-dd");
-				String eintritt = sdf.format(eintritt_datum);
+				String signed = sdf.format(eintritt_datum);
 				// IBAN
 				cell = row.getCell(Integer.parseInt(zuordnung
 						.getProperty(StaticString.Z_IBAN)));
@@ -99,7 +99,7 @@ public final class ExcelReader extends Reader {
 				cell = row.getCell(Integer.parseInt(zuordnung
 						.getProperty(StaticString.Z_VERWENDUNGSZWECK)));
 				String zweck = cell.getStringCellValue();
-				Person tmp = new Person(nr, name, vorname, eintritt, iban, bic,
+				Person tmp = new Person(id, name, vorname, signed, iban, bic,
 						inhaber, mandatsref, betrag, zweck);
 				persons.add(tmp);
 			}
