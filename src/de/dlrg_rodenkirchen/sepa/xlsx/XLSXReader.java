@@ -9,8 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import jxl.read.biff.BiffException;
-
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -25,15 +23,15 @@ public final class XLSXReader extends Reader {
 
 	private XSSFWorkbook w;
 
-	public XLSXReader(File f, int sheetNr) throws IOException, BiffException {
+	public XLSXReader(File f, int sheetNr) throws IOException {
 		super(f, sheetNr);
 	}
 
-	public XLSXReader(File f) throws IOException, BiffException {
+	public XLSXReader(File f) throws IOException {
 		super(f);
 	}
 
-	public XLSXReader() throws IOException, BiffException {
+	public XLSXReader() throws IOException {
 		super();
 	}
 
