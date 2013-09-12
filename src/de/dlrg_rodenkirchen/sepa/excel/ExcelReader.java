@@ -25,10 +25,6 @@ public final class ExcelReader extends Reader {
 	private Workbook w;
 	private Sheet sheet;
 
-	public ExcelReader(File f, int sheetNr) throws IOException {
-		super(f, sheetNr);
-	}
-
 	public ExcelReader(File f) throws IOException {
 		super(f);
 	}

@@ -22,5 +22,15 @@ public final class Check {
 	public static final boolean notInt(String number) {
 		return !number.matches("[0-9]+");
 	}
+	
+	public static final boolean arrayContainsString(String[] array, String s){
+		boolean contains = false;
+		for(String s1 : array){
+			if(s1.equals(s)){
+				contains = true;
+			}
+		}
+		return contains;
+	}
 
 }

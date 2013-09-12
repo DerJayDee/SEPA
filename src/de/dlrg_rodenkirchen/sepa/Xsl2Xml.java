@@ -16,6 +16,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -47,12 +48,19 @@ public final class Xsl2Xml extends JFrame {
 	private JTextField tf_credIBAN;
 	private JTextField tf_credBIC;
 	private JTextField tf_execDate;
-	private JTextField tf_excelSheet;
+
+	private JComboBox<String> cb_excelSheetName;
 
 	private Properties props;
 
 	private GridBagConstraints gbc;
 
+	private int step;
+	private static final int STEP_DEBITOR_INFO = 1;
+	private static final int STEP_SHEET_SELECTION = 2;
+	private static final int STEP_COLUMN_MATCHING = 3;
+
+	private IReader reader;
 	private ArrayList<Person> persons;
 
 	private ResourceBundle texte;
@@ -60,10 +68,10 @@ public final class Xsl2Xml extends JFrame {
 	public Xsl2Xml() {
 		loadStrings();
 		loadProps();
-		createFirstGui();
+		createDebitorInfoGui();
 	}
 
-	class OpenExcelListener implements ActionListener {
+	final class OpenExcelListener implements ActionListener {
 		public final void actionPerformed(ActionEvent e) {
 			saveProps();
 			JFileChooser c = new JFileChooser();
@@ -77,7 +85,7 @@ public final class Xsl2Xml extends JFrame {
 				c.addChoosableFileFilter(ff);
 				c.setFileFilter(ff);
 				int rVal = c.showOpenDialog(Xsl2Xml.this);
-				IReader reader = null;
+				reader = null;
 				if (rVal == JFileChooser.APPROVE_OPTION) {
 					if (reader == null) {
 						try {
@@ -92,6 +100,7 @@ public final class Xsl2Xml extends JFrame {
 					}
 					try {
 						reader.setFile(c.getSelectedFile());
+						createSheetSelectionGui();
 					} catch (Exception e1) {
 						e1.printStackTrace();
 						JOptionPane.showMessageDialog(c,
@@ -99,37 +108,79 @@ public final class Xsl2Xml extends JFrame {
 								texte.getString("D_ERROR"),
 								JOptionPane.ERROR_MESSAGE);
 					}
-					try {
-						int excelSheetInt = Integer.parseInt(props
-								.getProperty(StaticString.P_EXCEL_SHEET));
-						reader.setSheet(excelSheetInt);
-						persons = reader.read();
-						if (persons.size() > 0) {
-							button_save.setEnabled(true);
-							JOptionPane.showMessageDialog(c,
-									texte.getString("D_FILE_READ_TEXT")
-											+ persons.size(),
-									texte.getString("D_FILE_READ"),
-									JOptionPane.INFORMATION_MESSAGE);
-						} else {
-							JOptionPane.showMessageDialog(c,
-									texte.getString("D_ERROR_NO_RECORDS_TEXT"),
-									texte.getString("D_ERROR"),
-									JOptionPane.ERROR_MESSAGE);
-						}
-					} catch (Exception e1) {
-						e1.printStackTrace();
-						JOptionPane.showMessageDialog(c,
-								texte.getString("D_ERROR_PARSING_TEXT"),
-								texte.getString("D_ERROR"),
-								JOptionPane.ERROR_MESSAGE);
-					}
+
 				}
 			}
 		}
 	}
 
-	class SaveXMLListener implements ActionListener {
+	final class PrevListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			switch(step){
+			case STEP_DEBITOR_INFO:
+				break;
+			case STEP_SHEET_SELECTION:
+				createDebitorInfoGui();
+				break;
+			case STEP_COLUMN_MATCHING:
+				createSheetSelectionGui();
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	final class OpenSheetListener implements ActionListener {
+		public final void actionPerformed(ActionEvent e) {
+			saveProps();
+			Container c = getContentPane();
+			try {
+				String sheetName = props
+						.getProperty(StaticString.P_EXCEL_SHEET);
+				reader.setSheet(sheetName);
+				createColumnMatchingGui();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(c,
+						texte.getString("D_ERROR_PARSING_TEXT"),
+						texte.getString("D_ERROR"), JOptionPane.ERROR_MESSAGE);
+			}
+		}
+
+	}
+
+	final class ReadSheetListener implements ActionListener {
+		public final void actionPerformed(ActionEvent e) {
+			saveProps();
+			Container c = getContentPane();
+			try {
+				persons = reader.read();
+				if (persons.size() > 0) {
+					button_save.setEnabled(true);
+					JOptionPane.showMessageDialog(
+							c,
+							texte.getString("D_FILE_READ_TEXT")
+									+ persons.size(),
+							texte.getString("D_FILE_READ"),
+							JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(c,
+							texte.getString("D_ERROR_NO_RECORDS_TEXT"),
+							texte.getString("D_ERROR"),
+							JOptionPane.ERROR_MESSAGE);
+				}
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(c,
+						texte.getString("D_ERROR_PARSING_TEXT"),
+						texte.getString("D_ERROR"), JOptionPane.ERROR_MESSAGE);
+			}
+		}
+
+	}
+
+	final class SaveXMLListener implements ActionListener {
 		public final void actionPerformed(ActionEvent e) {
 			saveProps();
 			JFileChooser c = new JFileChooser();
@@ -162,7 +213,7 @@ public final class Xsl2Xml extends JFrame {
 		}
 	}
 
-	class MainWindowListener implements WindowListener {
+	final class MainWindowListener implements WindowListener {
 
 		@Override
 		public final void windowActivated(WindowEvent arg0) {
@@ -203,13 +254,11 @@ public final class Xsl2Xml extends JFrame {
 	}
 
 	public static final void main(String[] args) {
-		run(new Xsl2Xml(), 400, 220);
+		run(new Xsl2Xml());
 	}
 
-	public static final void run(JFrame frame, int width, int height) {
+	public static final void run(JFrame frame) {
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.setSize(width, height);
-		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
 
@@ -250,7 +299,6 @@ public final class Xsl2Xml extends JFrame {
 		tf_credIBAN.setText(tf_credIBAN.getText().replaceAll("\\s", ""));
 		tf_credBIC.setText(tf_credBIC.getText().replaceAll("\\s", ""));
 		tf_execDate.setText(tf_execDate.getText().replaceAll("\\s", ""));
-		tf_excelSheet.setText(tf_excelSheet.getText().replaceAll("\\s", ""));
 
 		try {
 			// trim execDate
@@ -262,7 +310,10 @@ public final class Xsl2Xml extends JFrame {
 			props.put(StaticString.P_CRED_IBAN, tf_credIBAN.getText());
 			props.put(StaticString.P_CRED_BIC, tf_credBIC.getText());
 			props.put(StaticString.P_EXEC_DATE, tf_execDate.getText());
-			props.put(StaticString.P_EXCEL_SHEET, tf_excelSheet.getText());
+			if (cb_excelSheetName != null) {
+				props.put(StaticString.P_EXCEL_SHEET, cb_excelSheetName
+						.getSelectedItem().toString());
+			}
 			// save properties to project root folder
 			props.store(new FileOutputStream(StaticString.PROPS_NAME), null);
 
@@ -271,14 +322,15 @@ public final class Xsl2Xml extends JFrame {
 		}
 	}
 
-	private final void createFirstGui() {
-		button_next = new JButton(texte.getString("BUTTON_NEXT"));
-		button_save = new JButton(texte.getString("BUTTON_SAVE"));
+	private final void createDebitorInfoGui() {
+		step = STEP_DEBITOR_INFO;
+		button_open = new JButton(texte.getString("BUTTON_OPEN"));
+		button_prev = new JButton(texte.getString("BUTTON_PREV"));
+		button_prev.addActionListener(new PrevListener());
 
 		this.setTitle(texte.getString("TITLE"));
 
 		this.addWindowListener(new MainWindowListener());
-		Container c = getContentPane();
 		JPanel mainP = new JPanel();
 		mainP.setLayout(new GridBagLayout());
 		gbc = new GridBagConstraints();
@@ -322,26 +374,106 @@ public final class Xsl2Xml extends JFrame {
 						props.getProperty(StaticString.P_EXEC_DATE), 20), p1,
 				1, 4);
 
-		// excelSheet
-		addLabel(texte.getString("TFL_EXCEL_SHEET"), p1, 0, 5);
-		addTextField(
-				tf_excelSheet = new JTextField(
-						props.getProperty(StaticString.P_EXCEL_SHEET)), p1, 1,
-				5);
-
 		// ButtonPannel
-		// Buttons
 		JPanel p2 = new JPanel();
 		p2.setLayout(new GridBagLayout());
+
 		// Open-Button
 		button_open.addActionListener(new OpenExcelListener());
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		p2.add(button_open, gbc);
-		// Save-Button
-		button_save.addActionListener(new SaveXMLListener());
-		button_save.setEnabled(false);
+
+		// Assemble
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		mainP.add(p1, gbc);
+
+		gbc.gridx = 0;
 		gbc.gridy = 1;
+		mainP.add(p2, gbc);
+
+		setGui(mainP);
+	}
+
+	private final void createSheetSelectionGui() {
+		step = STEP_SHEET_SELECTION;
+		button_next = new JButton(texte.getString("BUTTON_NEXT"));
+
+		JPanel mainP = new JPanel();
+		mainP.setLayout(new GridBagLayout());
+
+		JPanel p1 = new JPanel();
+		p1.setLayout(new GridBagLayout());
+
+		addLabel(texte.getString("TFL_EXCEL_SHEET"), p1, 0, 0);
+		cb_excelSheetName = new JComboBox<String>(reader.getSheetNames());
+		if (Check.arrayContainsString(reader.getSheetNames(),
+				props.getProperty(StaticString.P_EXCEL_SHEET))) {
+			cb_excelSheetName.setSelectedItem(props
+					.getProperty(StaticString.P_EXCEL_SHEET));
+		}
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		gbc.weightx = 0.5;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		p1.add(cb_excelSheetName, gbc);
+
+		JPanel p2 = new JPanel();
+		p2.setLayout(new GridBagLayout());
+		
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		gbc.weightx = 0.5;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		p2.add(button_prev, gbc);
+
+		button_next.addActionListener(new OpenSheetListener());
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		gbc.weightx = 0.5;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		p2.add(button_next, gbc);
+
+		// Assemble
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		mainP.add(p1, gbc);
+
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		mainP.add(p2, gbc);
+
+		setGui(mainP);
+	}
+
+	private final void createColumnMatchingGui() {
+		step = STEP_COLUMN_MATCHING;
+		button_save = new JButton(texte.getString("BUTTON_SAVE"));
+
+		JPanel mainP = new JPanel();
+		mainP.setLayout(new GridBagLayout());
+
+		JPanel p1 = new JPanel();
+		p1.setLayout(new GridBagLayout());
+
+		// TODO Label Zuordnung!
+
+		JPanel p2 = new JPanel();
+		p2.setLayout(new GridBagLayout());
+
+		button_prev.addActionListener(null);
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		gbc.weightx = 0.5;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		p2.add(button_prev, gbc);
+
+		button_save.addActionListener(new SaveXMLListener());
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		gbc.weightx = 0.5;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 		p2.add(button_save, gbc);
 
 		// Assemble
@@ -353,7 +485,7 @@ public final class Xsl2Xml extends JFrame {
 		gbc.gridy = 1;
 		mainP.add(p2, gbc);
 
-		c.add(mainP);
+		setGui(mainP);
 	}
 
 	private final void addLabel(String name, Container c, int gridx, int gridy) {
@@ -374,12 +506,21 @@ public final class Xsl2Xml extends JFrame {
 		c.add(tf, gbc);
 	}
 
+	private final void setGui(JPanel panel) {
+		Container c = getContentPane();
+		c.removeAll();
+		c.add(panel);
+		this.revalidate();
+		this.repaint();
+		this.pack();
+		this.setLocationRelativeTo(null);
+	}
+
 	private final boolean inputNotCorrect(JFileChooser c) {
 		if (tf_credName.getText().equals("") || tf_credID.getText().equals("")
 				|| tf_credIBAN.getText().equals("")
 				|| tf_credBIC.getText().equals("")
-				|| tf_execDate.getText().equals("")
-				|| tf_excelSheet.getText().equals("")) {
+				|| tf_execDate.getText().equals("")) {
 			JOptionPane.showMessageDialog(c,
 					texte.getString("D_MISSING_VALUES_TEXT"),
 					texte.getString("D_MISSING_VALUES"),
@@ -389,12 +530,6 @@ public final class Xsl2Xml extends JFrame {
 			JOptionPane.showMessageDialog(c,
 					texte.getString("D_ILLEGAL_DATE_TEXT"),
 					texte.getString("D_ILLEGAL_DATE"),
-					JOptionPane.ERROR_MESSAGE);
-			return true;
-		} else if (Check.notInt(props.getProperty(StaticString.P_EXCEL_SHEET))) {
-			JOptionPane.showMessageDialog(c,
-					texte.getString("D_INVALID_SHEET_TEXT"),
-					texte.getString("D_INVALID_SHEET"),
 					JOptionPane.ERROR_MESSAGE);
 			return true;
 		}

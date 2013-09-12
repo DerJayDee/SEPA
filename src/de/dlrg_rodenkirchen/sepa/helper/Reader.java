@@ -17,18 +17,13 @@ public abstract class Reader implements IReader {
 
 	protected Properties zuordnung;
 
-	public Reader(File f, int sheetNr) throws IOException {
+	public Reader(File f) throws IOException {
 		loadProps();
 		setFile(f);
-		setSheet(sheetNr);
-	}
-
-	public Reader(File f) throws IOException {
-		this(f, -1);
 	}
 
 	public Reader() throws IOException {
-		this(null, -1);
+		this(null);
 	}
 
 	public abstract ArrayList<Person> read() throws ParseException,

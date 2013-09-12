@@ -17,4 +17,8 @@ public interface IReader {
 	public void setSheet(int sheetNr) throws IllegalArgumentException;
 	
 	public void setSheet(String sheetName) throws IllegalArgumentException;
+	
+	public abstract int getSheetCount();
+
+	public abstract String[] getSheetNames();
 }
