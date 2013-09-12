@@ -9,15 +9,15 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import de.dlrg_rodenkirchen.sepa.helper.StaticString;
 
 public final class ExcelFilter extends FileFilter {
-	
+
 	private ResourceBundle texte;
 
 	private final FileNameExtensionFilter filter;
-	
-	public ExcelFilter(){
+
+	public ExcelFilter() {
 		loadStrings();
-		filter = new FileNameExtensionFilter(
-				texte.getString("FF_EXCEL"), "xls", "xlsx");
+		filter = new FileNameExtensionFilter(texte.getString("FF_EXCEL"),
+				"xls", "xlsx");
 	}
 
 	public boolean accept(File file) {
@@ -28,11 +28,10 @@ public final class ExcelFilter extends FileFilter {
 	public String getDescription() {
 		return filter.getDescription();
 	}
-	
+
 	private final void loadStrings() {
 		if (texte == null) {
-			texte = ResourceBundle
-					.getBundle(StaticString.STRINGS_BUNDLE);
+			texte = ResourceBundle.getBundle(StaticString.STRINGS_BUNDLE);
 		}
 	}
 }
