@@ -113,10 +113,11 @@ public final class ExcelReader extends Reader {
 			String filename = file.getName();
 			if (filename.endsWith("xls")) {
 				w = new HSSFWorkbook(is);
+				fileIsNotSet = false;
 			} else if (filename.endsWith("xlsx")) {
 				w = new XSSFWorkbook(is);
+				fileIsNotSet = false;
 			}
-			fileIsNotSet = false;
 		} else {
 			fileIsNotSet = true;
 		}
