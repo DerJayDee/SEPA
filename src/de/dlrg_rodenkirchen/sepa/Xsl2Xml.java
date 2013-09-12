@@ -278,7 +278,6 @@ public final class Xsl2Xml extends JFrame {
 			} else {
 				in = ClassLoader.getSystemClassLoader().getResourceAsStream(
 						StaticString.CONFIG_PATH + StaticString.PROPS_NAME);
-				System.out.println("done");
 			}
 			if (in != null) {
 				props.load(in);

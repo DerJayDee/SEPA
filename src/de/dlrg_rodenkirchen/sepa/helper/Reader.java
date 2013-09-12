@@ -8,7 +8,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import jxl.read.biff.BiffException;
 import de.dlrg_rodenkirchen.sepa.interfaces.IReader;
 
 public abstract class Reader implements IReader {
@@ -20,24 +19,24 @@ public abstract class Reader implements IReader {
 
 	protected Properties zuordnung;
 
-	public Reader(File f, int sheetNr) throws IOException, BiffException {
+	public Reader(File f, int sheetNr) throws IOException {
 		loadProps();
 		setFile(f);
 		setSheet(sheetNr);
 	}
 
-	public Reader(File f) throws IOException, BiffException {
+	public Reader(File f) throws IOException {
 		this(f, -1);
 	}
 
-	public Reader() throws IOException, BiffException {
+	public Reader() throws IOException {
 		this(null, -1);
 	}
 
 	public abstract ArrayList<Person> read() throws ParseException,
 			NumberFormatException, IndexOutOfBoundsException;
 
-	public abstract void setFile(File file) throws IOException, BiffException;
+	public abstract void setFile(File file) throws IOException;
 
 	public final void setSheet(int sheetNr) {
 		if (sheetNr >= 0) {
