@@ -23,6 +23,7 @@ import de.dlrg_rodenkirchen.sepa.helper.StaticString;
 public final class ExcelReader extends Reader {
 
 	private Workbook w;
+	private Sheet sheet;
 
 	public ExcelReader(File f, int sheetNr) throws IOException {
 		super(f, sheetNr);
@@ -43,7 +44,6 @@ public final class ExcelReader extends Reader {
 			throw new IllegalStateException();
 		}
 		ArrayList<Person> persons = new ArrayList<Person>();
-		Sheet sheet = w.getSheetAt(sheetNr);
 		for (int i = 1; i < sheet.getLastRowNum(); i++) {
 			Row row = null;
 			if ((row = sheet.getRow(i)) != null) {
@@ -121,5 +121,41 @@ public final class ExcelReader extends Reader {
 		} else {
 			fileIsNotSet = true;
 		}
+	}
+
+	@Override
+	public final void setSheet(int sheetNr) throws IllegalArgumentException {
+		if (sheetNr >= 0) {
+			sheet = w.getSheetAt(sheetNr);
+			this.sheetIsNotSet = false;
+		} else {
+			sheetIsNotSet = true;
+			throw new IllegalArgumentException();
+		}
+	}
+
+	@Override
+	public final void setSheet(String sheetName)
+			throws IllegalArgumentException {
+		sheet = w.getSheet(sheetName);
+		if (sheet != null) {
+			this.sheetIsNotSet = false;
+		} else {
+			sheetIsNotSet = true;
+			throw new IllegalArgumentException();
+		}
+	}
+
+	public final int getSheetCount() {
+		return w.getNumberOfSheets();
+	}
+
+	public final String[] getSheetNames() {
+		int sheetCount = w.getNumberOfSheets();
+		String[] sheets = new String[sheetCount];
+		for (int i = 0; i < sheetCount; i++) {
+			sheets[i] = w.getSheetName(i);
+		}
+		return sheets;
 	}
 }

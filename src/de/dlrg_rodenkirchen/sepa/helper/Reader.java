@@ -13,8 +13,6 @@ import de.dlrg_rodenkirchen.sepa.interfaces.IReader;
 public abstract class Reader implements IReader {
 
 	protected boolean fileIsNotSet;
-
-	protected int sheetNr;
 	protected boolean sheetIsNotSet;
 
 	protected Properties zuordnung;
@@ -38,14 +36,13 @@ public abstract class Reader implements IReader {
 
 	public abstract void setFile(File file) throws IOException;
 
-	public final void setSheet(int sheetNr) {
-		if (sheetNr >= 0) {
-			this.sheetNr = sheetNr;
-			this.sheetIsNotSet = false;
-		} else {
-			sheetIsNotSet = true;
-		}
-	}
+	public abstract void setSheet(int sheetNr) throws IllegalArgumentException;
+	
+	public abstract void setSheet(String sheetName) throws IllegalArgumentException;
+
+	public abstract int getSheetCount();
+
+	public abstract String[] getSheetNames();
 
 	protected final void loadProps() throws IOException {
 		if (zuordnung == null) {

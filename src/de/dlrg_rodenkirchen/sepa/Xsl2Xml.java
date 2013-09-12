@@ -39,6 +39,8 @@ public final class Xsl2Xml extends JFrame {
 
 	private JButton button_open;
 	private JButton button_save;
+	private JButton button_next;
+	private JButton button_prev;
 
 	private JTextField tf_credName;
 	private JTextField tf_credID;
@@ -58,7 +60,7 @@ public final class Xsl2Xml extends JFrame {
 	public Xsl2Xml() {
 		loadStrings();
 		loadProps();
-		createGui();
+		createFirstGui();
 	}
 
 	class OpenExcelListener implements ActionListener {
@@ -269,8 +271,8 @@ public final class Xsl2Xml extends JFrame {
 		}
 	}
 
-	private final void createGui() {
-		button_open = new JButton(texte.getString("BUTTON_OPEN"));
+	private final void createFirstGui() {
+		button_next = new JButton(texte.getString("BUTTON_NEXT"));
 		button_save = new JButton(texte.getString("BUTTON_SAVE"));
 
 		this.setTitle(texte.getString("TITLE"));

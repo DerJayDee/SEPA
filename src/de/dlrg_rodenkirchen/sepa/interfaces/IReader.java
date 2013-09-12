@@ -13,6 +13,8 @@ public interface IReader {
 			NumberFormatException, IndexOutOfBoundsException;
 
 	public void setFile(File file) throws IOException;
-
-	public void setSheet(int sheetNr);
+	
+	public void setSheet(int sheetNr) throws IllegalArgumentException;
+	
+	public void setSheet(String sheetName) throws IllegalArgumentException;
 }
