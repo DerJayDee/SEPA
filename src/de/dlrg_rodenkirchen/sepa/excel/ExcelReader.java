@@ -50,7 +50,8 @@ public final class ExcelReader {
 			throw new IllegalStateException();
 		}
 		ArrayList<Person> persons = new ArrayList<Person>();
-		for (int i = 1; i < sheet.getLastRowNum(); i++) {
+		System.out.println("rows:" + sheet.getLastRowNum());
+		for (int i = 1; i <= sheet.getLastRowNum(); i++) {
 			Row row = null;
 			if ((row = sheet.getRow(i)) != null) {
 				// Mitgliedsnummer
