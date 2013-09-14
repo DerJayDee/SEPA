@@ -21,12 +21,13 @@ import org.w3c.dom.Element;
 
 import de.dlrg_rodenkirchen.sepa.helper.Person;
 import de.dlrg_rodenkirchen.sepa.helper.StaticString;
-import de.dlrg_rodenkirchen.sepa.helper.Writer;
 
-public final class XMLWriter extends Writer {
+public final class XMLWriter {
+
+	private Properties props;
 
 	public XMLWriter(Properties props) throws IOException {
-		super(props);
+		setProps(props);
 	}
 
 	public final void write(File xmlFile, ArrayList<Person> persons)
@@ -70,6 +71,10 @@ public final class XMLWriter extends Writer {
 		DOMSource source = new DOMSource(doc);
 		StreamResult result = new StreamResult(xmlFile);
 		transformer.transform(source, result);
+	}
+
+	public final void setProps(Properties props) {
+		this.props = props;
 	}
 
 	private final Element createDocumentElem(Document doc) {

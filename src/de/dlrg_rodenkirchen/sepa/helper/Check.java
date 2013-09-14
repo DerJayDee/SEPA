@@ -23,4 +23,14 @@ public final class Check {
 		return !number.matches("[0-9]+");
 	}
 
+	public static final boolean arrayContainsString(String[] array, String s) {
+		boolean contains = false;
+		for (String s1 : array) {
+			if (s1.equals(s)) {
+				contains = true;
+			}
+		}
+		return contains;
+	}
+
 }
