@@ -179,7 +179,8 @@ public final class ExcelReader {
 		for (int j = 0; j < i; j++) {
 			column = 'A';
 			column += j;
-			labels[j] = row.getCell(j).getStringCellValue() + " (" + column + ")";
+			labels[j] = row.getCell(j).getStringCellValue() + " (" + column
+					+ ")";
 		}
 		return labels;
 	}

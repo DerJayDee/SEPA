@@ -370,16 +370,26 @@ public final class Xsl2Xml extends JFrame {
 		}
 		try {
 			// set all props
-			zuordnung.put(StaticString.Z_ID, Integer.toString(cb_id.getSelectedIndex()));
-			zuordnung.put(StaticString.Z_VORNAME, Integer.toString(cb_vname.getSelectedIndex()));
-			zuordnung.put(StaticString.Z_NACHNAME, Integer.toString(cb_nname.getSelectedIndex()));
-			zuordnung.put(StaticString.Z_INHABER, Integer.toString(cb_inhaber.getSelectedIndex()));
-			zuordnung.put(StaticString.Z_SIGNED, Integer.toString(cb_signed.getSelectedIndex()));
-			zuordnung.put(StaticString.Z_BIC, Integer.toString(cb_bic.getSelectedIndex()));
-			zuordnung.put(StaticString.Z_IBAN, Integer.toString(cb_iban.getSelectedIndex()));
-			zuordnung.put(StaticString.Z_REFERENZ, Integer.toString(cb_mandatsref.getSelectedIndex()));
-			zuordnung.put(StaticString.Z_BEITRAG, Integer.toString(cb_betrag.getSelectedIndex()));
-			zuordnung.put(StaticString.Z_ZWECK, Integer.toString(cb_zweck.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_ID,
+					Integer.toString(cb_id.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_VORNAME,
+					Integer.toString(cb_vname.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_NACHNAME,
+					Integer.toString(cb_nname.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_INHABER,
+					Integer.toString(cb_inhaber.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_SIGNED,
+					Integer.toString(cb_signed.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_BIC,
+					Integer.toString(cb_bic.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_IBAN,
+					Integer.toString(cb_iban.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_REFERENZ,
+					Integer.toString(cb_mandatsref.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_BEITRAG,
+					Integer.toString(cb_betrag.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_ZWECK,
+					Integer.toString(cb_zweck.getSelectedIndex()));
 			// save properties to project root folder
 			zuordnung.store(new FileOutputStream(
 					StaticString.ZUORDNUNGS_PROPS_NAME), null);
@@ -531,14 +541,16 @@ public final class Xsl2Xml extends JFrame {
 		addContainer(new JLabel(texte.getString("CBL_NNAME"),
 				SwingConstants.LEFT), p1, 0, 2);
 		addContainer(cb_nname = new JComboBox<String>(labels), p1, 1, 2);
-		zIndex = Integer.parseInt(zuordnung.getProperty(StaticString.Z_NACHNAME));
+		zIndex = Integer.parseInt(zuordnung
+				.getProperty(StaticString.Z_NACHNAME));
 		setZuordnungsChoice(cb_nname, zIndex, labels.length);
 
 		// dbtVName
 		addContainer(new JLabel(texte.getString("CBL_VNAME"),
 				SwingConstants.LEFT), p1, 0, 3);
 		addContainer(cb_vname = new JComboBox<String>(labels), p1, 1, 3);
-		zIndex = Integer.parseInt(zuordnung.getProperty(StaticString.Z_VORNAME));
+		zIndex = Integer
+				.parseInt(zuordnung.getProperty(StaticString.Z_VORNAME));
 		setZuordnungsChoice(cb_vname, zIndex, labels.length);
 
 		// dbtSigned
@@ -567,21 +579,24 @@ public final class Xsl2Xml extends JFrame {
 		addContainer(new JLabel(texte.getString("CBL_INHABER"),
 				SwingConstants.LEFT), p1, 0, 7);
 		addContainer(cb_inhaber = new JComboBox<String>(labels), p1, 1, 7);
-		zIndex = Integer.parseInt(zuordnung.getProperty(StaticString.Z_INHABER));
+		zIndex = Integer
+				.parseInt(zuordnung.getProperty(StaticString.Z_INHABER));
 		setZuordnungsChoice(cb_inhaber, zIndex, labels.length);
 
 		// dbtBetrag
 		addContainer(new JLabel(texte.getString("CBL_BETRAG"),
 				SwingConstants.LEFT), p1, 0, 8);
 		addContainer(cb_betrag = new JComboBox<String>(labels), p1, 1, 8);
-		zIndex = Integer.parseInt(zuordnung.getProperty(StaticString.Z_BEITRAG));
+		zIndex = Integer
+				.parseInt(zuordnung.getProperty(StaticString.Z_BEITRAG));
 		setZuordnungsChoice(cb_betrag, zIndex, labels.length);
 
 		// dbtMandatsreferenz
 		addContainer(new JLabel(texte.getString("CBL_MANDATSREF"),
 				SwingConstants.LEFT), p1, 0, 9);
 		addContainer(cb_mandatsref = new JComboBox<String>(labels), p1, 1, 9);
-		zIndex = Integer.parseInt(zuordnung.getProperty(StaticString.Z_REFERENZ));
+		zIndex = Integer.parseInt(zuordnung
+				.getProperty(StaticString.Z_REFERENZ));
 		setZuordnungsChoice(cb_mandatsref, zIndex, labels.length);
 
 		// dbtZweck
@@ -669,14 +684,10 @@ public final class Xsl2Xml extends JFrame {
 
 	private final boolean zuordnungNotCorrect() {
 		int[] cb_values = new int[] { cb_id.getSelectedIndex(),
-				cb_vname.getSelectedIndex(),
-				cb_nname.getSelectedIndex(),
-				cb_inhaber.getSelectedIndex(),
-				cb_signed.getSelectedIndex(),
-				cb_bic.getSelectedIndex(),
-				cb_iban.getSelectedIndex(),
-				cb_mandatsref.getSelectedIndex(),
-				cb_betrag.getSelectedIndex(),
+				cb_vname.getSelectedIndex(), cb_nname.getSelectedIndex(),
+				cb_inhaber.getSelectedIndex(), cb_signed.getSelectedIndex(),
+				cb_bic.getSelectedIndex(), cb_iban.getSelectedIndex(),
+				cb_mandatsref.getSelectedIndex(), cb_betrag.getSelectedIndex(),
 				cb_zweck.getSelectedIndex() };
 		Set<Integer> values = new HashSet<Integer>();
 		for (int i = 0; i < cb_values.length; i++) {
@@ -685,8 +696,9 @@ public final class Xsl2Xml extends JFrame {
 		}
 		return false;
 	}
-	
-	private final void setZuordnungsChoice(JComboBox<String> cb, int index, int length){
+
+	private final void setZuordnungsChoice(JComboBox<String> cb, int index,
+			int length) {
 		if (index >= 0 && index < length) {
 			cb.setSelectedIndex(index);
 		} else {
