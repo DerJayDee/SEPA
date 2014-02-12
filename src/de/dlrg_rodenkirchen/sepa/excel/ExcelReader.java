@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -43,14 +44,14 @@ public final class ExcelReader {
 		this(null, null);
 	}
 
-	public final ArrayList<Person> read() throws ParseException,
+	public final HashMap<String, ArrayList<Person>> read() throws ParseException,
 			NumberFormatException, IndexOutOfBoundsException,
 			IllegalStateException {
 		if (fileIsNotSet || sheetIsNotSet) {
 			throw new IllegalStateException();
 		}
-		ArrayList<Person> persons = new ArrayList<Person>();
-		System.out.println("rows:" + sheet.getLastRowNum());
+		ArrayList<Person> firsts = new ArrayList<Person>();
+		ArrayList<Person> recurrings = new ArrayList<Person>();
 		for (int i = 1; i <= sheet.getLastRowNum(); i++) {
 			Row row = null;
 			if ((row = sheet.getRow(i)) != null) {
@@ -106,12 +107,29 @@ public final class ExcelReader {
 				cell = row.getCell(Integer.parseInt(zuordnung
 						.getProperty(StaticString.Z_ZWECK)));
 				String zweck = cell.getStringCellValue();
+				// Sequenztyp
+				// TODO Sequenztyp
+				cell = row.getCell(Integer.parseInt(zuordnung.getProperty(StaticString.Z_SEQUENZTYP)));
+				String sequenztyp = cell.getStringCellValue();
 				Person tmp = new Person(id, name, vorname, signed, iban, bic,
-						inhaber, mandatsref, betrag, zweck);
-				persons.add(tmp);
+						inhaber, mandatsref, betrag, zweck, sequenztyp);
+				switch(sequenztyp){
+				case "a":
+					firsts.add(tmp);
+					break;
+				case "b":
+					recurrings.add(tmp);
+					break;
+				default:
+					firsts.add(tmp);
+					break;
+				}
 			}
 		}
-		return persons;
+		HashMap<String, ArrayList<Person>> returnMap = new HashMap<>();
+		returnMap.put(StaticString.PERSONS_FIRST, firsts);
+		returnMap.put(StaticString.PERSONS_RECURRING, recurrings);
+		return returnMap;
 	}
 
 	public final void setZuordnung(Properties zuorung) {

@@ -30,8 +30,8 @@ public final class XMLWriter {
 		setProps(props);
 	}
 
-	public final void write(File xmlFile, ArrayList<Person> persons)
-			throws Exception {
+	public final void write(File xmlFile, ArrayList<Person> firsts,
+			ArrayList<Person> recurrings) throws Exception {
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory
 				.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -48,21 +48,38 @@ public final class XMLWriter {
 		document.appendChild(root);
 
 		// GrpHdr
-		Element header = createGrpHdrElem(doc, persons);
+		Element header = createGrpHdrElem(doc, firsts, recurrings);
 		root.appendChild(header);
 
+		// FIRSTS
 		// PmtInf
-		Element pmtInf = doc.createElement("PmtInf");
-		appendPmtInfHdr(pmtInf, doc, persons);
-		appendCdtr(pmtInf, doc);
+		Element pmtInfFirst = doc.createElement("PmtInf");
+		// TODO anpassen
+		appendPmtInfHdr(pmtInfFirst, doc, firsts, "firsts");
+		appendCdtr(pmtInfFirst, doc);
 
-		Element dbtr;
-		for (Person p : persons) {
-			dbtr = createDbtr(p, doc);
-			pmtInf.appendChild(dbtr);
+		Element dbtrFirst;
+		for (Person p : firsts) {
+			dbtrFirst = createDbtr(p, doc);
+			pmtInfFirst.appendChild(dbtrFirst);
 		}
 
-		root.appendChild(pmtInf);
+		root.appendChild(pmtInfFirst);
+
+		// RECURRINGS
+		// PmtInf
+		Element pmtInfRec = doc.createElement("PmtInf");
+		// TODO anpassen
+		appendPmtInfHdr(pmtInfRec, doc, recurrings, "recurrings");
+		appendCdtr(pmtInfRec, doc);
+
+		Element dbtrRec;
+		for (Person p : firsts) {
+			dbtrRec = createDbtr(p, doc);
+			pmtInfRec.appendChild(dbtrRec);
+		}
+
+		root.appendChild(pmtInfRec);
 
 		// XML schreiben
 		TransformerFactory transformerFactory = TransformerFactory
@@ -91,7 +108,8 @@ public final class XMLWriter {
 	}
 
 	private final Element createGrpHdrElem(Document doc,
-			ArrayList<Person> persons) throws Exception {
+			ArrayList<Person> firsts, ArrayList<Person> recurrings)
+			throws Exception {
 		Element header = doc.createElement("GrpHdr");
 
 		SimpleDateFormat sdf = new SimpleDateFormat();
@@ -110,12 +128,13 @@ public final class XMLWriter {
 
 		// NbOfTxs
 		Element nbOfTxs = doc.createElement("NbOfTxs");
-		nbOfTxs.appendChild(doc.createTextNode("" + persons.size()));
+		nbOfTxs.appendChild(doc.createTextNode(""
+				+ (firsts.size() + recurrings.size())));
 		header.appendChild(nbOfTxs);
 
 		// CtrlSum
 		Element ctrlSum = doc.createElement("CtrlSum");
-		ctrlSum.appendChild(doc.createTextNode(getTotalSum(persons)));
+		ctrlSum.appendChild(doc.createTextNode(getTotalSum(firsts, recurrings)));
 		header.appendChild(ctrlSum);
 
 		// InitgPty
@@ -127,6 +146,22 @@ public final class XMLWriter {
 		header.appendChild(initgPty);
 
 		return header;
+	}
+
+	private final String getTotalSum(ArrayList<Person> firsts,
+			ArrayList<Person> recurrings) throws Exception {
+		double sum = 0.0;
+		NumberFormat format = NumberFormat.getInstance(Locale.GERMAN);
+		Number number;
+		for (Person person : firsts) {
+			number = format.parse(person.getBetrag());
+			sum += number.doubleValue();
+		}
+		for (Person person : recurrings) {
+			number = format.parse(person.getBetrag());
+			sum += number.doubleValue();
+		}
+		return String.format(Locale.ENGLISH, "%1$.2f", sum);
 	}
 
 	private final String getTotalSum(ArrayList<Person> persons)
@@ -142,7 +177,7 @@ public final class XMLWriter {
 	}
 
 	private final void appendPmtInfHdr(Element pmtInf, Document doc,
-			ArrayList<Person> persons) throws Exception {
+			ArrayList<Person> persons, String sequence) throws Exception {
 		SimpleDateFormat sdf = new SimpleDateFormat();
 
 		// PmtInfId
@@ -187,7 +222,18 @@ public final class XMLWriter {
 		pmtTpInf.appendChild(lclInstrm);
 
 		Element seqTp = doc.createElement("SeqTp");
-		seqTp.appendChild(doc.createTextNode("FRST"));
+		// TODO change!
+		switch(sequence){
+		case "a":
+			seqTp.appendChild(doc.createTextNode("FRST"));
+			break;
+		case "b":
+			seqTp.appendChild(doc.createTextNode("RCUR"));
+			break;
+		default:
+			seqTp.appendChild(doc.createTextNode("FRST"));
+			break;
+		}
 		pmtTpInf.appendChild(seqTp);
 
 		pmtInf.appendChild(pmtTpInf);
