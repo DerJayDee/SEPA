@@ -44,9 +44,9 @@ public final class ExcelReader {
 		this(null, null);
 	}
 
-	public final HashMap<String, ArrayList<Person>> read() throws ParseException,
-			NumberFormatException, IndexOutOfBoundsException,
-			IllegalStateException {
+	public final HashMap<String, ArrayList<Person>> read()
+			throws ParseException, NumberFormatException,
+			IndexOutOfBoundsException, IllegalStateException {
 		if (fileIsNotSet || sheetIsNotSet) {
 			throw new IllegalStateException();
 		}
@@ -108,12 +108,13 @@ public final class ExcelReader {
 						.getProperty(StaticString.Z_ZWECK)));
 				String zweck = cell.getStringCellValue();
 				// Sequenztyp
-				// TODO Sequenztyp
-				cell = row.getCell(Integer.parseInt(zuordnung.getProperty(StaticString.Z_SEQUENZTYP)));
+				cell = row.getCell(Integer.parseInt(zuordnung
+						.getProperty(StaticString.Z_SEQUENZTYP)));
 				String sequenztyp = cell.getStringCellValue();
 				Person tmp = new Person(id, name, vorname, signed, iban, bic,
 						inhaber, mandatsref, betrag, zweck, sequenztyp);
-				switch(sequenztyp){
+				// TODO switch korrekt einstellen
+				switch (sequenztyp) {
 				case "a":
 					firsts.add(tmp);
 					break;

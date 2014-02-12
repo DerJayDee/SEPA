@@ -68,8 +68,8 @@ public final class Person {
 	public final String getZweck() {
 		return zweck;
 	}
-	
-	public final String getSequenztyp(){
+
+	public final String getSequenztyp() {
 		return sequenztyp;
 	}
 

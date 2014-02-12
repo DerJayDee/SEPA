@@ -21,7 +21,7 @@ public final class StaticString {
 	public static final String Z_REFERENZ = "mandatsreferenz";
 	public static final String Z_ZWECK = "verwendungszweck";
 	public static final String Z_SEQUENZTYP = "sequenztyp";
-	
+
 	public static final String PERSONS_FIRST = "firsts";
 	public static final String PERSONS_RECURRING = "recurring";
 

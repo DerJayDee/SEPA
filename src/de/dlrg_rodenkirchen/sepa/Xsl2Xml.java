@@ -182,10 +182,11 @@ public final class Xsl2Xml extends JFrame {
 			} else {
 				saveZuordnung();
 				try {
-					HashMap<String, ArrayList<Person>> personsMap = reader.read(); 
+					HashMap<String, ArrayList<Person>> personsMap = reader
+							.read();
 					firsts = personsMap.get(StaticString.PERSONS_FIRST);
 					recurrings = personsMap.get(StaticString.PERSONS_RECURRING);
-					
+
 					if (firsts.size() > 0 || recurrings.size() > 0) {
 						createItemsReadGui(firsts.size() + recurrings.size());
 					} else {
@@ -535,8 +536,6 @@ public final class Xsl2Xml extends JFrame {
 		String[] labels = reader.getLabels();
 		int zIndex = -1;
 
-		// TODO Set Choice
-
 		// dbtID
 		addContainer(
 				new JLabel(texte.getString("CBL_ID"), SwingConstants.LEFT), p1,
@@ -618,7 +617,8 @@ public final class Xsl2Xml extends JFrame {
 		addContainer(new JLabel(texte.getString("CBL_SEQUENZTYP"),
 				SwingConstants.LEFT), p1, 0, 11);
 		addContainer(cb_sequenztyp = new JComboBox<String>(labels), p1, 1, 11);
-		zIndex = Integer.parseInt(zuordnung.getProperty(StaticString.Z_SEQUENZTYP));
+		zIndex = Integer.parseInt(zuordnung
+				.getProperty(StaticString.Z_SEQUENZTYP));
 		setZuordnungsChoice(cb_sequenztyp, zIndex, labels.length);
 
 		JPanel p2 = new JPanel();

@@ -54,8 +54,7 @@ public final class XMLWriter {
 		// FIRSTS
 		// PmtInf
 		Element pmtInfFirst = doc.createElement("PmtInf");
-		// TODO anpassen
-		appendPmtInfHdr(pmtInfFirst, doc, firsts, "firsts");
+		appendPmtInfHdr(pmtInfFirst, doc, firsts, StaticString.PERSONS_FIRST);
 		appendCdtr(pmtInfFirst, doc);
 
 		Element dbtrFirst;
@@ -69,8 +68,8 @@ public final class XMLWriter {
 		// RECURRINGS
 		// PmtInf
 		Element pmtInfRec = doc.createElement("PmtInf");
-		// TODO anpassen
-		appendPmtInfHdr(pmtInfRec, doc, recurrings, "recurrings");
+		appendPmtInfHdr(pmtInfRec, doc, recurrings,
+				StaticString.PERSONS_RECURRING);
 		appendCdtr(pmtInfRec, doc);
 
 		Element dbtrRec;
@@ -222,16 +221,12 @@ public final class XMLWriter {
 		pmtTpInf.appendChild(lclInstrm);
 
 		Element seqTp = doc.createElement("SeqTp");
-		// TODO change!
-		switch(sequence){
-		case "a":
+		switch (sequence) {
+		case StaticString.PERSONS_FIRST:
 			seqTp.appendChild(doc.createTextNode("FRST"));
 			break;
-		case "b":
+		case StaticString.PERSONS_RECURRING:
 			seqTp.appendChild(doc.createTextNode("RCUR"));
-			break;
-		default:
-			seqTp.appendChild(doc.createTextNode("FRST"));
 			break;
 		}
 		pmtTpInf.appendChild(seqTp);
