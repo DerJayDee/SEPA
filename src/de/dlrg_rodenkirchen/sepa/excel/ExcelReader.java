@@ -115,14 +115,11 @@ public final class ExcelReader {
 						inhaber, mandatsref, betrag, zweck, sequenztyp);
 				// TODO switch korrekt einstellen
 				switch (sequenztyp) {
-				case "a":
+				case StaticString.SEQUENZ_EXCEL_FIRST:
 					firsts.add(tmp);
 					break;
-				case "b":
+				case StaticString.SEQUENZ_EXCEL_RECURRING:
 					recurrings.add(tmp);
-					break;
-				default:
-					firsts.add(tmp);
 					break;
 				}
 			}

@@ -73,7 +73,7 @@ public final class XMLWriter {
 		appendCdtr(pmtInfRec, doc);
 
 		Element dbtrRec;
-		for (Person p : firsts) {
+		for (Person p : recurrings) {
 			dbtrRec = createDbtr(p, doc);
 			pmtInfRec.appendChild(dbtrRec);
 		}
