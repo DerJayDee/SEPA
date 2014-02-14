@@ -53,32 +53,37 @@ public final class XMLWriter {
 
 		// FIRSTS
 		// PmtInf
-		Element pmtInfFirst = doc.createElement("PmtInf");
-		appendPmtInfHdr(pmtInfFirst, doc, firsts, StaticString.PERSONS_FIRST);
-		appendCdtr(pmtInfFirst, doc);
+		if (firsts.size() > 0) {
+			Element pmtInfFirst = doc.createElement("PmtInf");
+			appendPmtInfHdr(pmtInfFirst, doc, firsts,
+					StaticString.PERSONS_FIRST);
+			appendCdtr(pmtInfFirst, doc);
 
-		Element dbtrFirst;
-		for (Person p : firsts) {
-			dbtrFirst = createDbtr(p, doc);
-			pmtInfFirst.appendChild(dbtrFirst);
+			Element dbtrFirst;
+			for (Person p : firsts) {
+				dbtrFirst = createDbtr(p, doc);
+				pmtInfFirst.appendChild(dbtrFirst);
+			}
+
+			root.appendChild(pmtInfFirst);
 		}
-
-		root.appendChild(pmtInfFirst);
 
 		// RECURRINGS
 		// PmtInf
-		Element pmtInfRec = doc.createElement("PmtInf");
-		appendPmtInfHdr(pmtInfRec, doc, recurrings,
-				StaticString.PERSONS_RECURRING);
-		appendCdtr(pmtInfRec, doc);
+		if (recurrings.size() > 0) {
+			Element pmtInfRec = doc.createElement("PmtInf");
+			appendPmtInfHdr(pmtInfRec, doc, recurrings,
+					StaticString.PERSONS_RECURRING);
+			appendCdtr(pmtInfRec, doc);
 
-		Element dbtrRec;
-		for (Person p : recurrings) {
-			dbtrRec = createDbtr(p, doc);
-			pmtInfRec.appendChild(dbtrRec);
+			Element dbtrRec;
+			for (Person p : recurrings) {
+				dbtrRec = createDbtr(p, doc);
+				pmtInfRec.appendChild(dbtrRec);
+			}
+
+			root.appendChild(pmtInfRec);
 		}
-
-		root.appendChild(pmtInfRec);
 
 		// XML schreiben
 		TransformerFactory transformerFactory = TransformerFactory
