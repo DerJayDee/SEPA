@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -61,6 +62,7 @@ public final class Xsl2Xml extends JFrame {
 	private JComboBox<String> cb_mandatsref;
 	private JComboBox<String> cb_betrag;
 	private JComboBox<String> cb_zweck;
+	private JComboBox<String> cb_sequenztyp;
 
 	private Properties props;
 
@@ -75,7 +77,8 @@ public final class Xsl2Xml extends JFrame {
 	private static final int STEP_ITEMS_READ = 4;
 
 	private ExcelReader reader;
-	private ArrayList<Person> persons;
+	private ArrayList<Person> firsts;
+	private ArrayList<Person> recurrings;
 
 	private ResourceBundle texte;
 
@@ -179,9 +182,13 @@ public final class Xsl2Xml extends JFrame {
 			} else {
 				saveZuordnung();
 				try {
-					persons = reader.read();
-					if (persons.size() > 0) {
-						createItemsReadGui(persons.size());
+					HashMap<String, ArrayList<Person>> personsMap = reader
+							.read();
+					firsts = personsMap.get(StaticString.PERSONS_FIRST);
+					recurrings = personsMap.get(StaticString.PERSONS_RECURRING);
+
+					if (firsts.size() > 0 || recurrings.size() > 0) {
+						createItemsReadGui(firsts.size() + recurrings.size());
 					} else {
 						JOptionPane.showMessageDialog(c,
 								texte.getString("D_ERROR_NO_RECORDS_TEXT"),
@@ -213,7 +220,7 @@ public final class Xsl2Xml extends JFrame {
 					XMLWriter writer;
 					try {
 						writer = new XMLWriter(props);
-						writer.write(c.getSelectedFile(), persons);
+						writer.write(c.getSelectedFile(), firsts, recurrings);
 						JOptionPane.showMessageDialog(c,
 								texte.getString("D_XML_WRITTEN_TEXT"),
 								texte.getString("D_XML_WRITTEN"),
@@ -390,6 +397,8 @@ public final class Xsl2Xml extends JFrame {
 					Integer.toString(cb_betrag.getSelectedIndex()));
 			zuordnung.put(StaticString.Z_ZWECK,
 					Integer.toString(cb_zweck.getSelectedIndex()));
+			zuordnung.put(StaticString.Z_SEQUENZTYP,
+					Integer.toString(cb_sequenztyp.getSelectedIndex()));
 			// save properties to project root folder
 			zuordnung.store(new FileOutputStream(
 					StaticString.ZUORDNUNGS_PROPS_NAME), null);
@@ -527,8 +536,6 @@ public final class Xsl2Xml extends JFrame {
 		String[] labels = reader.getLabels();
 		int zIndex = -1;
 
-		// TODO Set Choice
-
 		// dbtID
 		addContainer(
 				new JLabel(texte.getString("CBL_ID"), SwingConstants.LEFT), p1,
@@ -605,6 +612,14 @@ public final class Xsl2Xml extends JFrame {
 		addContainer(cb_zweck = new JComboBox<String>(labels), p1, 1, 10);
 		zIndex = Integer.parseInt(zuordnung.getProperty(StaticString.Z_ZWECK));
 		setZuordnungsChoice(cb_zweck, zIndex, labels.length);
+
+		// dbtSequenztyp
+		addContainer(new JLabel(texte.getString("CBL_SEQUENZTYP"),
+				SwingConstants.LEFT), p1, 0, 11);
+		addContainer(cb_sequenztyp = new JComboBox<String>(labels), p1, 1, 11);
+		zIndex = Integer.parseInt(zuordnung
+				.getProperty(StaticString.Z_SEQUENZTYP));
+		setZuordnungsChoice(cb_sequenztyp, zIndex, labels.length);
 
 		JPanel p2 = new JPanel();
 		p2.setLayout(new GridBagLayout());
@@ -688,7 +703,7 @@ public final class Xsl2Xml extends JFrame {
 				cb_inhaber.getSelectedIndex(), cb_signed.getSelectedIndex(),
 				cb_bic.getSelectedIndex(), cb_iban.getSelectedIndex(),
 				cb_mandatsref.getSelectedIndex(), cb_betrag.getSelectedIndex(),
-				cb_zweck.getSelectedIndex() };
+				cb_zweck.getSelectedIndex(), cb_sequenztyp.getSelectedIndex() };
 		Set<Integer> values = new HashSet<Integer>();
 		for (int i = 0; i < cb_values.length; i++) {
 			if (!values.add(cb_values[i]))

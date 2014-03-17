@@ -20,6 +20,13 @@ public final class StaticString {
 	public static final String Z_BEITRAG = "beitrag";
 	public static final String Z_REFERENZ = "mandatsreferenz";
 	public static final String Z_ZWECK = "verwendungszweck";
+	public static final String Z_SEQUENZTYP = "sequenztyp";
+
+	public static final String PERSONS_FIRST = "firsts";
+	public static final String PERSONS_RECURRING = "recurring";
+	
+	public static final String SEQUENZ_EXCEL_FIRST = "Erstlastschrift";
+	public static final String SEQUENZ_EXCEL_RECURRING = "Folgelastschrift";
 
 	public static final String STRINGS_BUNDLE = "de.dlrg_rodenkirchen.sepa.i18n.strings";
 

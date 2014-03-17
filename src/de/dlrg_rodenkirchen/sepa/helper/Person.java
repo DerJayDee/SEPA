@@ -11,10 +11,11 @@ public final class Person {
 	String mandatsref;
 	String betrag;
 	String zweck;
+	String sequenztyp;
 
 	public Person(String id, String name, String vorname, String signed,
 			String iban, String bic, String inhaber, String mandatsref,
-			String betrag, String zweck) {
+			String betrag, String zweck, String sequenztyp) {
 		this.id = id;
 		this.name = name;
 		this.vorname = vorname;
@@ -25,6 +26,7 @@ public final class Person {
 		this.mandatsref = mandatsref;
 		this.betrag = betrag;
 		this.zweck = zweck;
+		this.sequenztyp = sequenztyp;
 	}
 
 	public final String getId() {
@@ -65,6 +67,10 @@ public final class Person {
 
 	public final String getZweck() {
 		return zweck;
+	}
+
+	public final String getSequenztyp() {
+		return sequenztyp;
 	}
 
 }
